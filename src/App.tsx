@@ -4,6 +4,8 @@ import AdminLayout from "./layouts/AdminLayout";
 import DashboardPage from "./pages/Dashboard";
 import Vehicle from "./pages/Vehicles";
 import LoginPage from "./pages/LoginPage";
+import FuelPage from "./pages/FuelPage";
+import OrderPage from "./pages/OrderPage";
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="vehicles" element={<Vehicle />} />
+          <Route path="fuels" element={<FuelPage />} />
+          <Route path="orders" element={<OrderPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

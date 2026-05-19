@@ -93,16 +93,25 @@ export default function Vehicle() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Bạn có chắc muốn xóa phương tiện này không?")) return;
+  if (!confirm("Bạn có chắc muốn xóa phương tiện này không?")) return;
 
-    try {
-      await vehicleService.delete(id);
-      fetchVehicles();
-    } catch (error) {
-      console.error(error);
-      alert("Xóa phương tiện thất bại");
+  try {
+    const res = await vehicleService.delete(id);
+
+    // 👇 check status từ body
+    if (res?.status === "error") {
+      alert(res.message || "Xóa phương tiện thất bại");
+      return;
     }
-  };
+
+    // success
+    fetchVehicles();
+    alert("Xóa thành công");
+  } catch (error) {
+    console.error(error);
+    alert("Lỗi hệ thống khi xóa phương tiện");
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#f8fafc] p-6 text-slate-800">

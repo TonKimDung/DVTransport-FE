@@ -1,21 +1,21 @@
-import axios from "axios";
+import axiosClient from "../api/axiosClient";
 import type { Vehicle, VehicleRequest } from "../types/vehicle";
 
-const API_URL = "http://localhost:8080/api/vehicles";
+const BASE_PATH = "/vehicles";
 
 export const vehicleService = {
   getAll: async (): Promise<Vehicle[]> => {
-    const response = await axios.get(API_URL);
+    const response = await axiosClient.get(BASE_PATH);
     return response.data;
   },
 
   getById: async (id: number): Promise<Vehicle> => {
-    const response = await axios.get(`${API_URL}/${id}`);
+    const response = await axiosClient.get(`${BASE_PATH}/${id}`);
     return response.data;
   },
 
   create: async (data: VehicleRequest): Promise<Vehicle> => {
-    const response = await axios.post(API_URL, data);
+    const response = await axiosClient.post(BASE_PATH, data);
     return response.data;
   },
 
@@ -23,11 +23,12 @@ export const vehicleService = {
     id: number,
     data: VehicleRequest
   ): Promise<Vehicle> => {
-    const response = await axios.put(`${API_URL}/${id}`, data);
+    const response = await axiosClient.put(`${BASE_PATH}/${id}`, data);
     return response.data;
   },
 
-  delete: async (id: number): Promise<void> => {
-    await axios.delete(`${API_URL}/${id}`);
-  },
+  delete: async (id: number) => {
+  const response = await axiosClient.delete(`${BASE_PATH}/${id}`);
+  return response.data; 
+},
 };
