@@ -6,6 +6,7 @@ import Vehicle from "./pages/Vehicles";
 import LoginPage from "./pages/LoginPage";
 import FuelPage from "./pages/FuelPage";
 import OrderPage from "./pages/OrderPage";
+import TripPage from "./pages/TripPage";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="vehicles" element={<Vehicle />} />
           <Route path="fuels" element={<FuelPage />} />
           <Route path="orders" element={<OrderPage />} />
+          <Route path="trips" element={<TripPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
