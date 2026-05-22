@@ -292,7 +292,7 @@ function TripCard({
 
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <h2 className="text-2xl font-bold text-slate-900">
+            <h2 className="text-xl font-bold text-slate-900">
               {trip.tripCode}
             </h2>
 

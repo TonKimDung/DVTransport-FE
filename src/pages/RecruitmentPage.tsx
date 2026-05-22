@@ -581,23 +581,9 @@ const handleUpdateApplicationStatus =
         }
     />
 
-      <div className="space-y-8">
+      <div className="space-y-7">
 
-        {/* HEADER */}
-
-        <div>
-          <h1 className="text-[48px] font-bold text-slate-900 leading-tight">
-            Quản lý tuyển dụng
-          </h1>
-
-          <p className="text-[18px] text-slate-400 mt-3">
-            Quản lý đợt
-            tuyển dụng,
-            hồ sơ ứng viên
-            và danh sách
-            tài xế
-          </p>
-        </div>
+        
 
         {/* MAIN TAB */}
 
@@ -803,7 +789,7 @@ const handleUpdateApplicationStatus =
                             .value
                         )
                       }
-                      className="w-full border border-slate-300 rounded-2xl p-4 text-[17px]"
+                      className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-orange-300"
                     >
                       <option value="">
                         Tất cả
@@ -1064,7 +1050,7 @@ function MainTabButton({
   return (
     <button
       onClick={onClick}
-      className={`pb-5 border-b-2 flex items-center gap-3 text-[17px] font-semibold transition ${
+      className={`pb-4 border-b-2 flex items-center gap-2 text-base font-semibold transition ${
         active
           ? "border-orange-500 text-orange-500"
           : "border-transparent text-slate-400 hover:text-slate-600"
@@ -1088,7 +1074,7 @@ function SubTabButton({
   return (
     <button
       onClick={onClick}
-      className={`pb-4 border-b-2 text-[17px] font-semibold transition ${
+      className={`pb-4 border-b-2 text-base font-semibold transition ${
         active
           ? "border-orange-500 text-orange-500"
           : "border-transparent text-slate-400"
@@ -1112,7 +1098,7 @@ function TopBar({
 }) {
   return (
     <div className="flex items-center justify-between">
-      <p className="text-[18px] text-slate-400">
+      <p className="text-base text-slate-400">
         Tổng số:{" "}
         <span className="font-bold text-slate-800">
           {total}
@@ -1122,7 +1108,7 @@ function TopBar({
       {!hideButton && (
         <button
           onClick={onClick}
-          className="bg-orange-500 hover:bg-orange-600 text-white px-7 py-4 rounded-2xl font-bold text-[18px] flex items-center gap-3 transition"
+          className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition"
         >
           <Plus size={22} />
           {buttonText}
@@ -1146,13 +1132,13 @@ function RecruitmentCard({
   ) => void;
 }) {
   return (
-    <div className="bg-white rounded-[26px] border border-slate-200 shadow-sm p-8">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-7">
       <div className="flex justify-between">
 
         <div>
           <div className="flex items-center gap-4 mb-4">
 
-            <h2 className="text-[24px] font-bold text-slate-900">
+            <h2 className="text-xl font-bold text-slate-900">
               {item.title}
             </h2>
 
@@ -1161,7 +1147,7 @@ function RecruitmentCard({
             />
           </div>
 
-          <p className="text-[17px] text-slate-500">
+          <p className="text-base text-slate-500">
             {item.description}
           </p>
         </div>
@@ -1183,7 +1169,7 @@ function RecruitmentCard({
             </Menu>
       </div>
 
-      <div className="border-t border-slate-200 mt-6 pt-6 grid grid-cols-2 gap-5">
+      <div className="border-t border-slate-200 mt-5 pt-5 grid grid-cols-2 gap-5">
 
         <Info
           icon={
@@ -1229,14 +1215,14 @@ function DriverCard({
   ) => void;
 }){
   return (
-    <div className="bg-white rounded-[26px] border border-slate-200 shadow-sm p-8">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-7">
 
       <div className="flex justify-between">
 
         <div className="w-full">
           <div className="flex items-center gap-4 mb-6">
 
-            <h2 className="text-[24px] font-bold text-slate-900">
+            <h2 className="text-xl font-bold text-slate-900">
               {item.fullName}
             </h2>
 
@@ -1337,14 +1323,14 @@ function ApplicationCard({
   ) => void;
 }) {
   return (
-    <div className="bg-white rounded-[26px] border border-slate-200 shadow-sm p-8">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-7">
 
       <div className="flex justify-between">
 
         <div className="w-full">
           <div className="flex items-center gap-4 mb-4">
 
-            <h2 className="text-[24px] font-bold text-slate-900">
+            <h2 className="text-xl font-bold text-slate-900">
               {item.fullName}
             </h2>
 
@@ -1353,7 +1339,7 @@ function ApplicationCard({
             />
           </div>
 
-          <p className="text-[17px] text-slate-500 mb-5">
+          <p className="text-base text-slate-500 mb-5">
             Ứng tuyển:
             {" "}
             {item.campaignName}
@@ -1468,16 +1454,16 @@ function AssignmentCard({
   ) => void;
 }){
   return (
-    <div className="bg-white rounded-[26px] border border-slate-200 shadow-sm p-8">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-7">
 
       <div className="flex justify-between items-center">
 
         <div>
-          <h2 className="text-[24px] font-bold text-slate-900">
+          <h2 className="text-xl font-bold text-slate-900">
             {item.driverName}
           </h2>
 
-          <p className="text-[17px] text-slate-500 mt-1">
+          <p className="text-base text-slate-500 mt-1">
             Phương tiện:
             {" "}
             {item.plateNumber}
@@ -1485,11 +1471,11 @@ function AssignmentCard({
         </div>
 
         <div className="text-right">
-          <p className="text-[16px] text-slate-400">
+          <p className="text-sm text-slate-400">
             Ngày bắt đầu
           </p>
 
-          <p className="font-semibold text-slate-900 text-[18px]">
+          <p className="font-bold text-slate-900">
             {formatDate(
               item.assignedDate
             )}
@@ -1537,7 +1523,7 @@ function StatusBadge({
 
   return (
     <span
-      className={`px-5 py-2 rounded-full text-[15px] font-semibold ${
+      className={`px-3 py-1 rounded-full text-sm font-semibold ${
         isGreen
           ? "bg-green-100 text-green-700"
           : "bg-yellow-100 text-yellow-700"
@@ -1561,7 +1547,7 @@ function Info({
         {icon}
       </span>
 
-      <span className="text-[16px] text-slate-700">
+      <span className="text-sm text-slate-700">
         {text || "-"}
       </span>
     </div>
@@ -1574,7 +1560,7 @@ function EmptyState({
   text: string;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-10 text-center text-slate-500">
+    <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center text-slate-500">
       {text}
     </div>
   );
@@ -1586,7 +1572,7 @@ function StatsGrid({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid grid-cols-4 gap-5">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       {children}
     </div>
   );
@@ -1604,7 +1590,7 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="bg-white rounded-[28px] border border-slate-200 p-7 shadow-sm">
+    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
       <div className="flex items-center justify-between mb-5">
         <div
           className={`w-14 h-14 rounded-2xl flex items-center justify-center ${color}`}
@@ -1613,11 +1599,11 @@ function StatCard({
         </div>
       </div>
 
-      <h2 className="text-[34px] font-bold text-slate-900">
+      <h2 className="text-3xl font-bold text-slate-900">
         {value}
       </h2>
 
-      <p className="text-[16px] text-slate-500 mt-1">
+      <p className="text-sm text-slate-500 mt-1">
         {title}
       </p>
     </div>
@@ -1713,7 +1699,7 @@ function MenuItem({
             onClick();
             onClose?.();
         }}
-        className="w-full px-5 py-4 text-left hover:bg-slate-100 transition text-[15px]"
+        className="w-full px-4 py-3 text-left hover:bg-slate-100 transition text-sm"
         >
         {children}
         </button>
