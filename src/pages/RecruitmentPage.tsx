@@ -27,7 +27,7 @@ import type {
 
 import type { Driver } from "../types/driver";
 
-import type { Assignment } from "../types/assigment";
+import type { Assignment } from "../types/assignment";
 
 import CreateCampaignModal from "../components/recruitment/CreateCampaignModal";
 import AddDriverModal from "../components/recruitment/AddDriverModal";
