@@ -22,7 +22,7 @@ const pageConfig: Record<
   },
 
   "/admin/trips": {
-    title: "Quản lý chuyến xe",
+    title: "Phân công",
     subtitle: "Theo dõi và điều phối chuyến xe",
   },
 

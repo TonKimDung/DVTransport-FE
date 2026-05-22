@@ -4,6 +4,7 @@ export interface Vehicle {
   vehicleType: string;
   capacity: number;
   status: string;
+  currentLocation: string;
   manufactureYear: number;
   inspectionExpiry: string;
   insuranceExpiry: string;
@@ -15,6 +16,7 @@ export interface VehicleRequest {
   vehicleType: string;
   capacity: number;
   status: string;
+  currentLocation: string;
   manufactureYear: number;
   inspectionExpiry: string;
   insuranceExpiry: string;

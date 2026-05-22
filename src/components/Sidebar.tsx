@@ -33,7 +33,7 @@ const menuItems = [
     icon: Fuel,
   },
   {
-    label: "Quản lý chuyến xe",
+    label: "Phân công",
     path: "/admin/trips",
     icon: MapPin,
   },

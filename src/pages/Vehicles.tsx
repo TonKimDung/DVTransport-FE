@@ -7,25 +7,24 @@ import {
   Search,
   Truck,
   Settings,
-  Fuel,
+  MapPin,
 } from "lucide-react";
+
 import { vehicleService } from "../services/vehicleService";
-import type {
-  Vehicle,
-  VehicleRequest,
-} from "../types/vehicle";
+import type { Vehicle, VehicleRequest } from "../types/vehicle";
 
 const emptyForm: VehicleRequest = {
   plateNumber: "",
   vehicleType: "",
   capacity: 0,
-  status: "Hoạt động",
+  status: "UN_ASSIGNED",
+  currentLocation: "",
   manufactureYear: new Date().getFullYear(),
   inspectionExpiry: "",
   insuranceExpiry: "",
 };
 
-export default function Vehicle() {
+export default function VehiclePage() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [search, setSearch] = useState("");
   const [openForm, setOpenForm] = useState(false);
@@ -39,7 +38,7 @@ export default function Vehicle() {
   const fetchVehicles = async () => {
     try {
       const data = await vehicleService.getAll();
-      setVehicles(data);
+      setVehicles(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error(error);
       alert("Không thể tải danh sách phương tiện");
@@ -48,16 +47,19 @@ export default function Vehicle() {
 
   const filteredVehicles = useMemo(() => {
     return vehicles.filter((v) =>
-      `${v.plateNumber} ${v.vehicleType} ${v.status}`
+      `${v.plateNumber} ${v.vehicleType} ${v.status} ${v.currentLocation}`
         .toLowerCase()
         .includes(search.toLowerCase())
     );
   }, [vehicles, search]);
 
   const totalVehicles = vehicles.length;
-  const activeVehicles = vehicles.filter((v) => v.status === "Hoạt động").length;
-  const maintenanceVehicles = vehicles.filter(
-    (v) => v.status === "Bảo trì"
+  const inTripVehicles = vehicles.filter((v) => v.status === "IN_TRIP").length;
+  const unassignedVehicles = vehicles.filter(
+    (v) => v.status === "UN_ASSIGNED"
+  ).length;
+  const maintainVehicles = vehicles.filter(
+    (v) => v.status === "MAINTAIN"
   ).length;
 
   const handleSubmit = async () => {
@@ -85,6 +87,7 @@ export default function Vehicle() {
       vehicleType: vehicle.vehicleType,
       capacity: vehicle.capacity,
       status: vehicle.status,
+      currentLocation: vehicle.currentLocation || "",
       manufactureYear: vehicle.manufactureYear,
       inspectionExpiry: vehicle.inspectionExpiry,
       insuranceExpiry: vehicle.insuranceExpiry,
@@ -93,25 +96,23 @@ export default function Vehicle() {
   };
 
   const handleDelete = async (id: number) => {
-  if (!confirm("Bạn có chắc muốn xóa phương tiện này không?")) return;
+    if (!confirm("Bạn có chắc muốn xóa phương tiện này không?")) return;
 
-  try {
-    const res = await vehicleService.delete(id);
+    try {
+      const res = await vehicleService.delete(id);
 
-    // 👇 check status từ body
-    if (res?.status === "error") {
-      alert(res.message || "Xóa phương tiện thất bại");
-      return;
+      if (res?.status === "error") {
+        alert(res.message || "Xóa phương tiện thất bại");
+        return;
+      }
+
+      fetchVehicles();
+      alert("Xóa thành công");
+    } catch (error) {
+      console.error(error);
+      alert("Lỗi hệ thống khi xóa phương tiện");
     }
-
-    // success
-    fetchVehicles();
-    alert("Xóa thành công");
-  } catch (error) {
-    console.error(error);
-    alert("Lỗi hệ thống khi xóa phương tiện");
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-[#f8fafc] p-6 text-slate-800">
@@ -120,28 +121,27 @@ export default function Vehicle() {
           icon={<Truck />}
           title="Tổng số xe"
           value={totalVehicles}
-          note="+12%"
           color="orange"
         />
+
         <StatCard
           icon={<Settings />}
-          title="Đang hoạt động"
-          value={activeVehicles}
-          note="Tốt"
+          title="Đang trong chuyến"
+          value={inTripVehicles}
           color="green"
         />
+
+        <StatCard
+          icon={<Settings />}
+          title="Chưa phân công"
+          value={unassignedVehicles}
+          color="yellow"
+        />
+
         <StatCard
           icon={<Settings />}
           title="Đang bảo trì"
-          value={maintenanceVehicles}
-          note="Cảnh báo"
-          color="yellow"
-        />
-        <StatCard
-          icon={<Fuel />}
-          title="Mức tiêu hao"
-          value="8.5L"
-          note="Trung bình"
+          value={maintainVehicles}
           color="purple"
         />
       </div>
@@ -151,7 +151,7 @@ export default function Vehicle() {
           <Search className="absolute top-3 left-3 text-slate-400" size={18} />
           <input
             className="w-full border rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-orange-300"
-            placeholder="Tìm kiếm theo biển số, loại xe, trạng thái..."
+            placeholder="Tìm kiếm theo biển số, loại xe, trạng thái, vị trí..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -199,6 +199,14 @@ export default function Vehicle() {
             />
 
             <Input
+              label="Vị trí hiện tại"
+              value={form.currentLocation}
+              onChange={(value) =>
+                setForm({ ...form, currentLocation: value })
+              }
+            />
+
+            <Input
               label="Năm sản xuất"
               type="number"
               value={form.manufactureYear}
@@ -212,13 +220,11 @@ export default function Vehicle() {
               <select
                 className="w-full border rounded-lg px-3 py-2 mt-1"
                 value={form.status}
-                onChange={(e) =>
-                  setForm({ ...form, status: e.target.value })
-                }
+                onChange={(e) => setForm({ ...form, status: e.target.value })}
               >
-                <option value="Hoạt động">Hoạt động</option>
-                <option value="Bảo trì">Bảo trì</option>
-                <option value="Ngưng hoạt động">Ngưng hoạt động</option>
+                <option value="UN_ASSIGNED">Chưa phân công</option>
+                <option value="IN_TRIP">Đang trong chuyến</option>
+                <option value="MAINTAIN">Đang bảo trì</option>
               </select>
             </div>
 
@@ -243,7 +249,11 @@ export default function Vehicle() {
 
           <div className="flex justify-end gap-3 mt-5">
             <button
-              onClick={() => setOpenForm(false)}
+              onClick={() => {
+                setOpenForm(false);
+                setEditingId(null);
+                setForm(emptyForm);
+              }}
               className="px-5 py-2 rounded-lg border"
             >
               Hủy
@@ -266,6 +276,7 @@ export default function Vehicle() {
               <th className="p-4">Biển số xe</th>
               <th className="p-4">Loại xe</th>
               <th className="p-4">Tải trọng</th>
+              <th className="p-4">Vị trí</th>
               <th className="p-4">Năm SX</th>
               <th className="p-4">Đăng kiểm</th>
               <th className="p-4">Bảo hiểm</th>
@@ -277,36 +288,41 @@ export default function Vehicle() {
           <tbody>
             {filteredVehicles.map((vehicle) => (
               <tr key={vehicle.id} className="border-t">
-                <td className="p-4 font-bold text-slate-900 flex items-center gap-3">
-                  <div className="bg-orange-100 text-orange-600 p-3 rounded-xl">
-                    <Truck size={18} />
+                <td className="p-4 font-bold text-slate-900">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-orange-100 text-orange-600 p-3 rounded-xl">
+                      <Truck size={18} />
+                    </div>
+                    {vehicle.plateNumber}
                   </div>
-                  {vehicle.plateNumber}
                 </td>
 
                 <td className="p-4">{vehicle.vehicleType}</td>
                 <td className="p-4">{vehicle.capacity} tấn</td>
+
+                <td className="p-4">
+                  <div className="flex items-center gap-2">
+                    <MapPin size={16} className="text-slate-500" />
+                    {vehicle.currentLocation || "Chưa cập nhật"}
+                  </div>
+                </td>
+
                 <td className="p-4">{vehicle.manufactureYear}</td>
                 <td className="p-4">{vehicle.inspectionExpiry}</td>
                 <td className="p-4">{vehicle.insuranceExpiry}</td>
 
                 <td className="p-4">
                   <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      vehicle.status === "Hoạt động"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
+                    className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusStyle(
+                      vehicle.status
+                    )}`}
                   >
-                    {vehicle.status}
+                    {formatStatus(vehicle.status)}
                   </span>
                 </td>
 
                 <td className="p-4">
                   <div className="flex gap-3 text-slate-600">
-                    <button title="Xem">
-                      <Eye size={18} />
-                    </button>
 
                     <button onClick={() => handleEdit(vehicle)} title="Sửa">
                       <Pencil size={18} />
@@ -315,6 +331,7 @@ export default function Vehicle() {
                     <button
                       onClick={() => handleDelete(vehicle.id)}
                       title="Xóa"
+                      className="text-red-500"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -325,7 +342,7 @@ export default function Vehicle() {
 
             {filteredVehicles.length === 0 && (
               <tr>
-                <td colSpan={8} className="text-center p-6 text-slate-500">
+                <td colSpan={9} className="text-center p-6 text-slate-500">
                   Không có phương tiện nào
                 </td>
               </tr>
@@ -341,13 +358,11 @@ function StatCard({
   icon,
   title,
   value,
-  note,
   color,
 }: {
   icon: React.ReactNode;
   title: string;
-  value: string | number;
-  note: string;
+  value: number;
   color: "orange" | "green" | "yellow" | "purple";
 }) {
   const colorMap = {
@@ -359,9 +374,8 @@ function StatCard({
 
   return (
     <div className="bg-white rounded-2xl shadow border p-6">
-      <div className="flex justify-between items-start">
-        <div className={`${colorMap[color]} p-3 rounded-xl`}>{icon}</div>
-        <span className="text-sm font-semibold">{note}</span>
+      <div className={`${colorMap[color]} p-3 rounded-xl inline-flex`}>
+        {icon}
       </div>
 
       <p className="mt-5 text-sm font-medium">{title}</p>
@@ -392,4 +406,18 @@ function Input({
       />
     </div>
   );
+}
+
+function formatStatus(status: string) {
+  if (status === "IN_TRIP") return "Đang trong chuyến";
+  if (status === "UN_ASSIGNED") return "Chưa phân công";
+  if (status === "MAINTAIN") return "Đang bảo trì";
+  return status;
+}
+
+function getStatusStyle(status: string) {
+  if (status === "IN_TRIP") return "bg-green-100 text-green-700";
+  if (status === "UN_ASSIGNED") return "bg-yellow-100 text-yellow-700";
+  if (status === "MAINTAIN") return "bg-purple-100 text-purple-700";
+  return "bg-slate-100 text-slate-700";
 }

@@ -161,11 +161,11 @@ const handleDelete = async (id: number) => {
   }, [orders, search, status]);
 
   const pendingCount = orders.filter((o) =>
-    ["Chờ nhận", "PENDING", "CREATED", "string"].includes(o.status)
+    ["Chưa phân công", "PENDING", "CREATED"].includes(o.status)
   ).length;
 
   const transportingCount = orders.filter((o) =>
-    ["Đang vận chuyển", "DELIVERING", "IN_PROGRESS"].includes(o.status)
+    ["Đã phân công", "DELIVERING", "ASSIGNED"].includes(o.status)
   ).length;
 
   const completedCount = orders.filter((o) =>
@@ -176,8 +176,8 @@ const handleDelete = async (id: number) => {
     <div className="space-y-7">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <StatCard icon={<FileText />} title="Tổng đơn hàng" value={orders.length} color="blue" />
-        <StatCard icon={<Clock />} title="Chờ nhận" value={pendingCount} color="yellow" />
-        <StatCard icon={<Truck />} title="Đang vận chuyển" value={transportingCount} color="orange" />
+        <StatCard icon={<Clock />} title="Chưa phân công" value={pendingCount} color="yellow" />
+        <StatCard icon={<Truck />} title="Đã phân công" value={transportingCount} color="orange" />
         <StatCard icon={<CheckCircle />} title="Hoàn thành" value={completedCount} color="green" />
       </div>
 
@@ -201,10 +201,9 @@ const handleDelete = async (id: number) => {
             onChange={(e) => setStatus(e.target.value)}
           >
             <option>Tất cả</option>
-            <option value="CREATED">Chờ nhận</option>
-            <option value="DELIVERING">Đang vận chuyển</option>
+            <option value="CREATED">Chưa phân công</option>
+            <option value="ASSIGNED">Đã phân công</option>
             <option value="COMPLETED">Hoàn thành</option>
-            <option value="string">string</option>
           </select>
         </div>
 
@@ -485,8 +484,8 @@ function CreateOrderModal({
             value={form.status}
             onChange={(v) => setForm({ ...form, status: v })}
           >
-            <option value="CREATED">Chờ nhận</option>
-            <option value="DELIVERING">Đang vận chuyển</option>
+            <option value="CREATED">Chưa phân công</option>
+            <option value="ASSIGNED">Đã phân công</option>
             <option value="COMPLETED">Hoàn thành</option>
           </Select>
         </div>
@@ -822,26 +821,26 @@ function formatMoney(value: number) {
 }
 
 function formatStatus(status: string) {
-  if (status === "CREATED" || status === "string") return "Chờ nhận";
-  if (status === "DELIVERING") return "Đang vận chuyển";
+  if (status === "CREATED" || status === "string") return "Chưa phân công";
+  if (status === "ASSIGNED") return "Đã phân công";
   if (status === "COMPLETED") return "Hoàn thành";
   return status;
 }
 
 function getStatusStyle(status: string) {
   if (status === "COMPLETED") return "bg-green-100 text-green-700";
-  if (status === "DELIVERING") return "bg-orange-100 text-orange-700";
+  if (status === "ASSIGNED") return "bg-orange-100 text-orange-700";
   return "bg-yellow-100 text-yellow-700";
 }
 
 function getStatusIconBg(status: string) {
   if (status === "COMPLETED") return "bg-green-100 text-green-600";
-  if (status === "DELIVERING") return "bg-orange-100 text-orange-600";
+  if (status === "ASSIGNED") return "bg-orange-100 text-orange-600";
   return "bg-yellow-100 text-yellow-600";
 }
 
 function getStatusIcon(status: string) {
   if (status === "COMPLETED") return <CheckCircle size={24} />;
-  if (status === "DELIVERING") return <Truck size={24} />;
+  if (status === "ASSIGNED") return <Truck size={24} />;
   return <Clock size={24} />;
 }
