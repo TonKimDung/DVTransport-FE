@@ -28,7 +28,16 @@ export const vehicleService = {
   },
 
   delete: async (id: number) => {
-  const response = await axiosClient.delete(`${BASE_PATH}/${id}`);
-  return response.data; 
-},
+    const response = await axiosClient.delete(`${BASE_PATH}/${id}`);
+    return response.data; 
+  },
+
+  async getAvailable() {
+    const res =
+      await axiosClient.get(
+        "/vehicles/available"
+      );
+
+    return res.data;
+  }
 };

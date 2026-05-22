@@ -7,6 +7,7 @@ import LoginPage from "./pages/LoginPage";
 import FuelPage from "./pages/FuelPage";
 import OrderPage from "./pages/OrderPage";
 import TripPage from "./pages/TripPage";
+import RecruitmentPage from "./pages/RecruitmentPage";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="fuels" element={<FuelPage />} />
           <Route path="orders" element={<OrderPage />} />
           <Route path="trips" element={<TripPage />} />
+          <Route path="recruitment" element={<RecruitmentPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
