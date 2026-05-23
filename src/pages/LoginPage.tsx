@@ -1,100 +1,83 @@
-import { Mail, Lock, Truck } from "lucide-react";
+import { Mail, Lock, Truck, X } from "lucide-react";
 
-export default function LoginPage() {
+export default function LoginModal({ onClose }: { onClose: () => void }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-200 px-4">
-      <div className="w-full max-w-[560px] bg-white rounded-3xl shadow-sm px-10 py-10">
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-[560px] bg-white rounded-3xl shadow-lg px-10 py-10 relative">
+        
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 text-gray-400 hover:text-black"
+        >
+          <X size={24} />
+        </button>
+
         {/* Logo */}
         <div className="flex flex-col items-center mb-10">
           <div className="w-20 h-20 rounded-2xl bg-orange-500 flex items-center justify-center mb-6">
             <Truck className="text-white" size={40} strokeWidth={2.5} />
           </div>
 
-          <h1 className="text-4xl font-bold text-[#10294a]">
+          <h1 className="text-3xl font-bold text-[#10294a]">
             DVTransport
           </h1>
 
-          <p className="mt-3 text-lg text-gray-600">
+          <p className="mt-2 text-gray-600">
             Hệ thống quản lý vận tải
           </p>
         </div>
 
         {/* Form */}
         <form className="space-y-6">
-          {/* Email */}
           <div>
-            <label className="block mb-3 text-[#10294a] font-semibold">
+            <label className="block mb-2 text-[#10294a] font-semibold">
               Email
             </label>
 
             <div className="relative">
-              <Mail
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                size={24}
-              />
-
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={22} />
               <input
                 type="email"
                 placeholder="email@example.com"
-                className="w-full h-[62px] pl-14 pr-4 border border-gray-300 rounded-xl text-lg outline-none focus:border-orange-500"
+                className="w-full h-[56px] pl-12 pr-4 border border-gray-300 rounded-xl outline-none focus:border-orange-500"
               />
             </div>
           </div>
 
-          {/* Password */}
           <div>
-            <label className="block mb-3 text-[#10294a] font-semibold">
+            <label className="block mb-2 text-[#10294a] font-semibold">
               Mật khẩu
             </label>
 
             <div className="relative">
-              <Lock
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                size={24}
-              />
-
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={22} />
               <input
                 type="password"
                 placeholder="••••••••"
-                className="w-full h-[62px] pl-14 pr-4 border border-gray-300 rounded-xl text-lg outline-none focus:border-orange-500"
+                className="w-full h-[56px] pl-12 pr-4 border border-gray-300 rounded-xl outline-none focus:border-orange-500"
               />
             </div>
           </div>
 
-          {/* Remember + Forgot */}
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-3 text-gray-700 font-medium">
-              <input
-                type="checkbox"
-                className="w-5 h-5 accent-orange-500"
-              />
-              Ghi nhớ đăng nhập
+          <div className="flex items-center justify-between text-sm">
+            <label className="flex items-center gap-2 text-gray-600">
+              <input type="checkbox" className="accent-orange-500" />
+              Ghi nhớ
             </label>
 
-            <button
-              type="button"
-              className="text-orange-600 hover:underline"
-            >
+            <button type="button" className="text-orange-600 hover:underline">
               Quên mật khẩu?
             </button>
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
-            className="w-full h-[60px] bg-orange-500 hover:bg-orange-600 text-white text-lg font-bold rounded-xl transition"
+            className="w-full h-[56px] bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl"
           >
             Đăng nhập
           </button>
         </form>
-
-        {/* Register */}
-        <p className="text-center mt-9 text-lg text-gray-600">
-          Chưa có tài khoản?{" "}
-          <span className="text-orange-600 font-semibold cursor-pointer hover:underline">
-            Đăng ký ngay
-          </span>
-        </p>
       </div>
     </div>
   );
