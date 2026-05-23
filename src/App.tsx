@@ -27,6 +27,7 @@ function App() {
           <Route path="trips" element={<TripPage />} />
           <Route path="recruitment" element={<RecruitmentPage />} />
           <Route path="incidents" element={<TransportTrackingPage />} />
+
         </Route>
       </Routes>
     </BrowserRouter>

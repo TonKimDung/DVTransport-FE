@@ -1,5 +1,5 @@
 import axiosClient from "../api/axiosClient";
-import type { Assignment } from "../types/assigment";
+import type { Assignment } from "../types/assignment";
 
 export const assignmentService = {
   async getAll(): Promise<
