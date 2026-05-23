@@ -91,11 +91,6 @@ function FlyToVehicle({ lat, lng }: { lat: number; lng: number }) {
 /* ========================= */
 
 export default function TransportTrackingPage() {
-  /* ========================= */
-  /* TAB STATE */
-  /* ========================= */
-
-  const [tab, setTab] = useState<"tracking" | "incident">("tracking");
 
   /* ========================= */
   /* STATES */
@@ -267,61 +262,11 @@ export default function TransportTrackingPage() {
   return (
     <div className="space-y-6 relative">
 
-      {/* HEADER + TAB */}
-      <div className="flex items-center justify-between">
-
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">
-            {tab === "tracking"
-              ? "Theo dõi vận tải"
-              : "Ghi nhận sự cố"}
-          </h1>
-
-          <p className="text-slate-500 mt-1">
-            {tab === "tracking"
-              ? "GPS realtime & lịch sử hành trình"
-              : "Quản lý sự cố chuyến đi"}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-
-          {/* TAB SWITCH */}
-          <div className="flex bg-slate-100 rounded-xl p-1">
-
-            <button
-              onClick={() => setTab("tracking")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                tab === "tracking"
-                  ? "bg-white shadow"
-                  : "text-slate-500"
-              }`}
-            >
-              Theo dõi
-            </button>
-
-            <button
-              onClick={() => setTab("incident")}
-              className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                tab === "incident"
-                  ? "bg-white shadow"
-                  : "text-slate-500"
-              }`}
-            >
-              Sự cố
-            </button>
-
-          </div>
-
-        </div>
-
-      </div>
-
       {/* ========================= */}
       {/* TAB 1: TRACKING */}
       {/* ========================= */}
 
-      {tab === "tracking" && (
+      {(
         <>
         
         {/* TRIP SELECT */}
@@ -479,12 +424,6 @@ export default function TransportTrackingPage() {
           </div>
         </>
       )}
-
-      {/* ========================= */}
-      {/* TAB 2: INCIDENT */}
-      {/* ========================= */}
-
-      {tab === "incident" && <IncidentPage />}
 
     </div>
   );
