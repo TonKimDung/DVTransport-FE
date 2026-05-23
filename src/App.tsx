@@ -8,6 +8,7 @@ import FuelPage from "./pages/FuelPage";
 import OrderPage from "./pages/OrderPage";
 import TripPage from "./pages/TripPage";
 import RecruitmentPage from "./pages/RecruitmentPage";
+import TransportTrackingPage from "./pages/TransportTrackingPage";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="orders" element={<OrderPage />} />
           <Route path="trips" element={<TripPage />} />
           <Route path="recruitment" element={<RecruitmentPage />} />
+          <Route path="incidents" element={<TransportTrackingPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
