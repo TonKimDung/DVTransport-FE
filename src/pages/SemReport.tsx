@@ -1,0 +1,728 @@
+import { useMemo } from "react";
+import ReactECharts from "echarts-for-react";
+import { useNavigate } from "react-router-dom";
+
+import {
+  Network,
+  Activity,
+  ArrowRight,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle,
+  BrainCircuit,
+  LineChart,
+  DollarSign,
+} from "lucide-react";
+
+import { useSemAnalytics } from "../hooks/useSemAnalytics";
+
+const labelMap: Record<
+  string,
+  string
+> = {
+  total_capacity:
+    "Tổng công suất vận chuyển",
+
+  empty_miles:
+    "Quãng đường chạy rỗng",
+
+  new_vehicle_ratio:
+    "Tỷ lệ xe mới",
+
+  incident_rate:
+    "Tỷ lệ sự cố",
+
+  retention_rate:
+    "Tỷ lệ giữ chân khách hàng",
+
+  avg_revenue:
+    "Doanh thu trung bình",
+
+  new_contracts:
+    "Số hợp đồng mới",
+};
+
+const getLabel = (
+  v: string
+) => labelMap[v] || v;
+
+export default function SemReport() {
+  const {
+    loading,
+    data,
+  } = useSemAnalytics();
+
+  const navigate = useNavigate();
+  const paths = useMemo(() => {
+    if (!data?.estimates)
+      return [];
+
+    return data.estimates
+      .filter(
+        (e) => e.op === "~"
+      )
+      .map((e) => ({
+        source: e.rval,
+        target: e.lval,
+
+        sourceLabel:
+          getLabel(e.rval),
+
+        targetLabel:
+          getLabel(e.lval),
+
+        effect: Number(
+          Number(
+            e.Estimate
+          ).toFixed(3)
+        ),
+
+        pValue:
+          e["p-value"] || 0,
+      }));
+  }, [data]);
+
+  const positive =
+    paths.filter(
+      (p) => p.effect > 0
+    ).length;
+
+  const negative =
+    paths.filter(
+      (p) => p.effect < 0
+    ).length;
+
+  const significant =
+    paths.filter(
+      (p) => p.pValue < 0.05
+    ).length;
+
+  const lineOption = {
+    tooltip: {
+      trigger: "axis",
+    },
+
+    grid: {
+      left: 50,
+      right: 20,
+      top: 40,
+      bottom: 90,
+    },
+
+    xAxis: {
+      type: "category",
+
+      data:
+        paths.map(
+          (p) =>
+            p.sourceLabel
+        ),
+
+      axisLabel: {
+        rotate: 20,
+      },
+    },
+
+    yAxis: {
+      type: "value",
+    },
+
+    series: [
+      {
+        type: "line",
+
+        smooth: true,
+
+        symbolSize: 12,
+
+        data:
+          paths.map(
+            (p) => p.effect
+          ),
+
+        lineStyle: {
+          width: 4,
+        },
+
+        areaStyle: {},
+
+        label: {
+          show: true,
+        },
+      },
+    ],
+  };
+
+  const graphOption = useMemo(() => {
+  return {
+    tooltip: {
+      formatter: (
+        params: any
+      ) => {
+        if (
+          params.dataType ===
+          "edge"
+        ) {
+          return `
+            <div>
+              <b>${getLabel(
+                params.data.source
+              )}</b>
+              →
+              <b>${getLabel(
+                params.data.target
+              )}</b>
+              <br/>
+              Hệ số:
+              <b>${params.data.value.toFixed(
+                3
+              )}</b>
+            </div>
+          `;
+        }
+
+        return `
+          <b>${getLabel(
+            params.data.name
+          )}</b>
+        `;
+      },
+    },
+
+    animation: true,
+
+    series: [
+      {
+        type: "graph",
+
+        layout: "none",
+
+        // FIX 1
+        roam: false,
+
+        draggable: false,
+
+        // FIX 2
+        left: "center",
+        top: "middle",
+
+        // FIX 3
+        zoom: 0.82,
+
+        symbolSize: 85,
+
+        label: {
+          show: true,
+          color: "#111827",
+          fontSize: 13,
+          fontWeight: 600,
+
+          formatter: (
+            params: any
+          ) =>
+            getLabel(
+              params.data.name
+            ),
+        },
+
+        data: [
+          {
+            name:
+              "total_capacity",
+            x: 120,
+            y: 120,
+            itemStyle: {
+              color: "#6366f1",
+            },
+          },
+
+          {
+            name:
+              "new_vehicle_ratio",
+            x: 120,
+            y: 280,
+            itemStyle: {
+              color: "#8b5cf6",
+            },
+          },
+
+          {
+            name:
+              "incident_rate",
+            x: 120,
+            y: 450,
+            itemStyle: {
+              color: "#f59e0b",
+            },
+          },
+
+          {
+            name:
+              "empty_miles",
+            x: 450,
+            y: 250,
+            itemStyle: {
+              color: "#ef4444",
+            },
+          },
+
+          {
+            name:
+              "retention_rate",
+            x: 780,
+            y: 250,
+            itemStyle: {
+              color: "#14b8a6",
+            },
+          },
+
+          {
+            name:
+              "new_contracts",
+            x: 780,
+            y: 450,
+            itemStyle: {
+              color: "#22c55e",
+            },
+          },
+
+          {
+            name:
+              "avg_revenue",
+            x: 1100,
+            y: 300,
+            itemStyle: {
+              color: "#0ea5e9",
+            },
+          },
+        ],
+
+        links:
+          data?.chart?.edges.map(
+            (e) => ({
+              source:
+                e.source,
+
+              target:
+                e.target,
+
+              value:
+                e.weight,
+
+              lineStyle: {
+                width:
+                  Math.abs(
+                    e.weight
+                  ) *
+                    2 +
+                  3,
+
+                color:
+                  e.weight > 0
+                    ? "#22c55e"
+                    : "#ef4444",
+
+                curveness: 0.15,
+                opacity: 0.9,
+              },
+
+              label: {
+                show: true,
+
+                formatter:
+                  e.weight.toFixed(
+                    2
+                  ),
+
+                fontSize: 12,
+
+                backgroundColor:
+                  "#fff",
+
+                padding: [4, 8],
+
+                borderRadius: 8,
+
+                color:
+                  e.weight > 0
+                    ? "#166534"
+                    : "#991b1b",
+              },
+            })
+          ) || [],
+
+        edgeSymbol: [
+          "circle",
+          "arrow",
+        ],
+
+        edgeSymbolSize: [6, 14],
+      },
+    ],
+  };
+}, [data]);
+
+  if (loading) {
+    return (
+      <div className="h-[500px] flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+        {/* REPORT TABS */}
+        <div className="flex items-center justify-between">
+
+        <div>
+            <h1 className="text-3xl font-bold text-slate-800">
+            Báo cáo phân tích
+            </h1>
+
+            <p className="text-slate-500 mt-1">
+            Theo dõi hiệu suất vận hành,
+            doanh thu và quan hệ SEM
+            </p>
+        </div>
+
+        <div className="bg-white border rounded-2xl p-1 shadow-sm flex items-center gap-1">
+            {/* TAB SEM */}
+            <button
+            className="
+                flex items-center gap-2
+                px-5 py-3
+                rounded-xl
+                bg-indigo-600
+                text-white
+                font-medium
+                shadow-sm
+            "
+            >
+            <BrainCircuit className="w-4 h-4" />
+
+            SEM
+            </button>
+
+            {/* TAB REVENUE */}
+            <button
+            onClick={() =>
+                navigate("/admin/revenue-report")
+            }
+            className="
+                flex items-center gap-2
+                px-5 py-3
+                rounded-xl
+                text-slate-600
+                hover:bg-slate-100
+                transition
+                font-medium
+            "
+            >
+            <DollarSign className="w-4 h-4" />
+
+            Doanh thu
+            </button>
+        </div>
+
+        </div>
+      {/* STATS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+        <div className="bg-white rounded-3xl border p-6 shadow-sm">
+
+          <TrendingUp className="text-green-600 mb-3" />
+
+          <p className="text-slate-500">
+            Quan hệ tích cực
+          </p>
+
+          <h2 className="text-4xl font-bold text-green-600">
+            {positive}
+          </h2>
+
+        </div>
+
+        <div className="bg-white rounded-3xl border p-6 shadow-sm">
+
+          <TrendingDown className="text-red-600 mb-3" />
+
+          <p className="text-slate-500">
+            Quan hệ tiêu cực
+          </p>
+
+          <h2 className="text-4xl font-bold text-red-600">
+            {negative}
+          </h2>
+
+        </div>
+
+        <div className="bg-white rounded-3xl border p-6 shadow-sm">
+
+          <AlertTriangle className="text-orange-500 mb-3" />
+
+          <p className="text-slate-500">
+            Quan hệ có ý nghĩa
+          </p>
+
+          <h2 className="text-4xl font-bold text-orange-500">
+            {significant}
+          </h2>
+
+        </div>
+
+      </div>
+
+      {/* LINE */}
+      <div className="bg-white rounded-3xl border p-6 shadow-sm">
+
+        <div className="flex items-center gap-3 mb-5">
+
+          <LineChart className="text-indigo-600" />
+
+          <div>
+            <h2 className="font-bold text-xl">
+              Xu hướng hệ số tác động
+            </h2>
+
+            <p className="text-slate-500 text-sm">
+              Giá trị càng lớn thì
+              mức ảnh hưởng càng mạnh
+            </p>
+          </div>
+
+        </div>
+
+        <ReactECharts
+          option={lineOption}
+          style={{
+            height: 420,
+          }}
+        />
+
+      </div>
+
+      {/* NETWORK */}
+      <div className="bg-white rounded-3xl border p-6 shadow-sm">
+
+        <div className="flex items-center gap-3 mb-5">
+
+          <Network className="text-blue-600" />
+
+          <div>
+
+            <h2 className="font-bold text-xl">
+              Sơ đồ quan hệ SEM
+            </h2>
+
+            <p className="text-sm text-slate-500">
+              Mũi tên xanh là tác động
+              tích cực, đỏ là tiêu cực
+            </p>
+
+          </div>
+
+        </div>
+
+        <ReactECharts
+          option={graphOption}
+          style={{
+            height: 650,
+          }}
+        />
+
+      </div>
+
+      {/* TABLE */}
+      <div className="bg-white rounded-3xl border p-6 shadow-sm overflow-auto">
+
+        <h2 className="font-bold text-xl mb-5">
+          Bảng phân tích hệ số
+        </h2>
+
+        <table className="w-full">
+
+          <thead>
+            <tr className="border-b">
+              <th className="text-left py-4">
+                Quan hệ
+              </th>
+              <th className="text-left py-4">
+                Hệ số
+              </th>
+              <th className="text-left py-4">
+                P-value
+              </th>
+              <th className="text-left py-4">
+                Ý nghĩa
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {paths.map(
+              (p, i) => (
+                <tr
+                  key={i}
+                  className="border-b"
+                >
+                  <td className="py-4">
+
+                    <div className="flex items-center gap-2">
+
+                      {p.sourceLabel}
+
+                      <ArrowRight className="w-4 h-4" />
+
+                      {p.targetLabel}
+
+                    </div>
+
+                  </td>
+
+                  <td
+                    className={`font-bold ${
+                      p.effect > 0
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {p.effect}
+                  </td>
+
+                  <td>
+                    {p.pValue.toFixed(
+                      5
+                    )}
+                  </td>
+
+                  <td>
+
+                    {p.pValue <
+                    0.05 ? (
+                      <span className="bg-green-100 text-green-700 px-3 py-1 rounded-xl text-sm">
+                        Có ý nghĩa
+                      </span>
+                    ) : (
+                      <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-xl text-sm">
+                        Yếu
+                      </span>
+                    )}
+
+                  </td>
+                </tr>
+              )
+            )}
+          </tbody>
+
+        </table>
+
+      </div>
+
+      {/* AI BUSINESS INSIGHTS */}
+    <div className="space-y-4">
+
+    <div>
+
+        <h2 className="text-2xl font-bold text-slate-800">
+        Đề xuất tối ưu từ phân tích SEM
+        </h2>
+
+        <p className="text-slate-500 mt-1">
+        Hệ thống tự động đề xuất
+        hướng cải thiện hiệu quả
+        vận hành dựa trên quan hệ dữ liệu.
+        </p>
+
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+        {data?.insights?.map(
+        (
+            item: any,
+            idx: number
+        ) => {
+
+            const styles = {
+            cost: {
+                bg:
+                "from-emerald-500 to-green-600",
+                icon: "💰",
+            },
+
+            revenue: {
+                bg:
+                "from-indigo-200 to-blue-600",
+                icon: "📈",
+            },
+
+            risk: {
+                bg:
+                "from-red-500 to-rose-600",
+                icon: "⚠️",
+            },
+
+            customer: {
+                bg:
+                "from-pink-200 to-fuchsia-600",
+                icon: "❤️",
+            },
+
+            general: {
+                bg:
+                "from-slate-600 to-slate-700",
+                icon: "🧠",
+            },
+            };
+
+            const style =
+            styles[
+                item.type as keyof typeof styles
+            ];
+
+            return (
+            <div
+                key={idx}
+                className={`bg-gradient-to-r ${style.bg} rounded-3xl p-6 text-white shadow-lg`}
+            >
+
+                <div className="flex items-center justify-between">
+
+                <div className="text-4xl">
+                    {
+                    style.icon
+                    }
+                </div>
+
+                <div className="text-sm bg-white/20 px-3 py-1 rounded-xl">
+                    Impact{" "}
+                    {
+                    item.impact
+                    }
+                </div>
+
+                </div>
+
+                <h3 className="text-xl font-bold mt-5">
+                {item.title}
+                </h3>
+
+                <p className="text-white/90 mt-3 leading-relaxed">
+                {
+                    item.description
+                }
+                </p>
+
+            </div>
+            );
+        }
+        )}
+
+    </div>
+
+    </div>
+
+    </div>
+  );
+}
