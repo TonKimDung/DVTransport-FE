@@ -1,21 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
+import type { Dispatch, ReactNode, SetStateAction } from "react";
 import {
   Calendar,
   CheckCircle,
   Clock,
   Edit,
-  Eye,
-  Trash2,
   FileText,
   Filter,
   MapPin,
   Package,
   Plus,
   Search,
+  Trash2,
   Truck,
 } from "lucide-react";
 
-import StatCard from "../components/StatCard"
+import StatCard from "../components/StatCard";
 
 import { orderService } from "../services/orderService";
 import { customerService } from "../services/customerService";
@@ -88,64 +88,74 @@ export default function OrderPage() {
   };
 
   const handleCreateOrder = async () => {
-  try {
-    if (!form.orderCode.trim()) {
-      alert("Vui lòng nhập mã đơn hàng");
-      return;
-    }
+    try {
+      if (!form.orderCode.trim()) {
+        alert("Vui lòng nhập mã đơn hàng");
+        return;
+      }
 
-    if (!form.customerId) {
-      alert("Vui lòng chọn khách hàng");
-      return;
-    }
+      if (!form.customerId) {
+        alert("Vui lòng chọn khách hàng");
+        return;
+      }
 
-    if (editingId) {
-      await orderService.update(editingId, form);
-    } else {
-      await orderService.create(form);
-    }
+      if (!form.routeId) {
+        alert("Vui lòng chọn tuyến đường");
+        return;
+      }
 
-    setOpenCreate(false);
-    setEditingId(null);
-    setForm(emptyForm);
-    loadOrders();
-  } catch (error) {
-    console.error(error);
-    alert(editingId ? "Cập nhật đơn thất bại" : "Tạo đơn vận chuyển thất bại");
-  }
-};
+      if (!form.weight || form.weight <= 0) {
+        alert("Vui lòng nhập trọng lượng hợp lệ");
+        return;
+      }
+
+      if (editingId) {
+        await orderService.update(editingId, form);
+      } else {
+        await orderService.create(form);
+      }
+
+      setOpenCreate(false);
+      setEditingId(null);
+      setForm(emptyForm);
+      loadOrders();
+    } catch (error) {
+      console.error(error);
+      alert(editingId ? "Cập nhật đơn thất bại" : "Tạo đơn vận chuyển thất bại");
+    }
+  };
 
   const handleEdit = (order: Order) => {
-  setEditingId(order.id);
+    setEditingId(order.id);
 
-  setForm({
-    orderCode: order.orderCode,
-    customerId: order.customerId,
-    contractId: order.contractId ?? null,
-    routeId: order.routeId ?? null,
-    cargoType: order.cargoType,
-    weight: order.weight,
-    quantity: order.quantity,
-    pickupAddress: order.pickupAddress,
-    deliveryAddress: order.deliveryAddress,
-    totalAmount: order.totalAmount,
-    status: order.status,
-  });
+    setForm({
+      orderCode: order.orderCode,
+      customerId: order.customerId,
+      contractId: order.contractId ?? null,
+      routeId: order.routeId ?? null,
+      cargoType: order.cargoType,
+      weight: order.weight,
+      quantity: order.quantity,
+      pickupAddress: order.pickupAddress,
+      deliveryAddress: order.deliveryAddress,
+      totalAmount: order.totalAmount,
+      status: order.status,
+    });
 
-  setOpenCreate(true);
-};
+    setOpenCreate(true);
+  };
 
-const handleDelete = async (id: number) => {
-  if (!confirm("Bạn có chắc muốn xóa đơn vận chuyển này không?")) return;
+  const handleDelete = async (id: number) => {
+    if (!confirm("Bạn có chắc muốn xóa đơn vận chuyển này không?")) return;
 
-  try {
-    await orderService.delete(id);
-    loadOrders();
-  } catch (error) {
-    console.error(error);
-    alert("Xóa đơn vận chuyển thất bại");
-  }
-};
+    try {
+      await orderService.delete(id);
+      loadOrders();
+    } catch (error) {
+      console.error(error);
+      alert("Xóa đơn vận chuyển thất bại");
+    }
+  };
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
@@ -153,8 +163,7 @@ const handleDelete = async (id: number) => {
         .toLowerCase()
         .includes(search.toLowerCase());
 
-      const matchStatus =
-        status === "Tất cả" ? true : order.status === status;
+      const matchStatus = status === "Tất cả" ? true : order.status === status;
 
       return matchSearch && matchStatus;
     });
@@ -218,15 +227,15 @@ const handleDelete = async (id: number) => {
 
           <button
             onClick={() => {
-                setEditingId(null);
-                setForm(emptyForm);
-                setOpenCreate(true);
+              setEditingId(null);
+              setForm(emptyForm);
+              setOpenCreate(true);
             }}
             className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2"
-            >
+          >
             <Plus size={20} />
             Tạo đơn mới
-            </button>
+          </button>
         </div>
       </div>
 
@@ -237,7 +246,7 @@ const handleDelete = async (id: number) => {
             order={order}
             onEdit={handleEdit}
             onDelete={handleDelete}
-            />
+          />
         ))}
 
         {filteredOrders.length === 0 && (
@@ -256,6 +265,7 @@ const handleDelete = async (id: number) => {
           customers={customers}
           contracts={contracts}
           routes={routes}
+          isEditing={!!editingId}
           onClose={() => setOpenCreate(false)}
           onSubmit={handleCreateOrder}
         />
@@ -335,11 +345,11 @@ function OrderCard({
 
           <div className="flex justify-end gap-5 text-slate-600">
             <button onClick={() => onEdit(order)}>
-            <Edit size={21} />
+              <Edit size={21} />
             </button>
 
             <button onClick={() => onDelete(order.id)} className="text-red-500">
-            <Trash2 size={21} />
+              <Trash2 size={21} />
             </button>
           </div>
         </div>
@@ -354,24 +364,46 @@ function CreateOrderModal({
   customers,
   contracts,
   routes,
+  isEditing,
   onClose,
   onSubmit,
 }: {
   form: OrderRequest;
-  setForm: React.Dispatch<React.SetStateAction<OrderRequest>>;
+  setForm: Dispatch<SetStateAction<OrderRequest>>;
   customers: Customer[];
   contracts: Contract[];
   routes: RouteItem[];
+  isEditing: boolean;
   onClose: () => void;
   onSubmit: () => void;
 }) {
+  const selectedRoute = useMemo(() => {
+    return routes.find((route) => route.id === form.routeId);
+  }, [routes, form.routeId]);
+
+  const costPerTon = Number(selectedRoute?.costPerTon || 0);
+
+  useEffect(() => {
+    const weight = Number(form.weight || 0);
+    const totalAmount = weight * costPerTon;
+
+    setForm((prev) => {
+      if (Number(prev.totalAmount || 0) === totalAmount) return prev;
+
+      return {
+        ...prev,
+        totalAmount,
+      };
+    });
+  }, [form.weight, form.routeId, costPerTon, setForm]);
+
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-start pt-10">
       <div className="bg-white w-[900px] max-h-[90vh] overflow-y-auto rounded-2xl shadow-xl">
         <div className="p-6 border-b flex justify-between items-center">
           <h2 className="text-xl font-bold flex items-center gap-3">
             <Plus className="text-orange-600" />
-            Tạo đơn vận chuyển mới
+            {isEditing ? "Cập nhật đơn vận chuyển" : "Tạo đơn vận chuyển mới"}
           </h2>
 
           <button onClick={onClose} className="text-2xl text-slate-500">
@@ -431,7 +463,8 @@ function CreateOrderModal({
             <option value="">-- Không chọn --</option>
             {routes.map((route) => (
               <option key={route.id} value={route.id}>
-                {route.routeName} - {route.distanceKm} km
+                {route.routeName} - {route.distanceKm} km -{" "}
+                {formatMoney(route.costPerTon)}/tấn
               </option>
             ))}
           </Select>
@@ -456,11 +489,10 @@ function CreateOrderModal({
             onChange={(v) => setForm({ ...form, quantity: Number(v) })}
           />
 
-          <Input
+          <ReadOnlyAmountInput
             label="Tổng tiền"
-            type="number"
             value={form.totalAmount}
-            onChange={(v) => setForm({ ...form, totalAmount: Number(v) })}
+            helper={`Công thức: ${form.weight || 0} tấn × ${formatMoney(costPerTon)}/tấn`}
           />
 
           <div className="col-span-2">
@@ -499,7 +531,7 @@ function CreateOrderModal({
             onClick={onSubmit}
             className="px-6 py-3 rounded-xl bg-orange-600 text-white font-bold"
           >
-            Tạo đơn
+            {isEditing ? "Cập nhật" : "Tạo đơn"}
           </button>
         </div>
       </div>
@@ -601,9 +633,7 @@ function PlanModal({ onClose }: { onClose: () => void }) {
 
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <h3 className="font-bold mb-4">
-                Đơn hàng trong kế hoạch
-              </h3>
+              <h3 className="font-bold mb-4">Đơn hàng trong kế hoạch</h3>
 
               {loading && (
                 <div className="border rounded-xl p-5 text-slate-500">
@@ -654,8 +684,7 @@ function PlanModal({ onClose }: { onClose: () => void }) {
 
             <div>
               <h3 className="font-bold mb-4">
-                Xe gợi ý{" "}
-                {selectedOrder ? `cho ${selectedOrder.orderCode}` : ""}
+                Xe gợi ý {selectedOrder ? `cho ${selectedOrder.orderCode}` : ""}
               </h3>
 
               {!selectedOrder && (
@@ -709,59 +738,6 @@ function PlanModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-function PlanOrderCard({ code }: { code: string }) {
-  return (
-    <div className="border rounded-xl p-4 mb-4">
-      <div className="flex justify-between">
-        <h4 className="font-bold">{code}</h4>
-        <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-lg text-sm">
-          Chờ nhận
-        </span>
-      </div>
-
-      <p className="mt-2">Công ty TNHH ABC</p>
-      <p className="text-sm text-slate-600 mt-2">📦 Thiết bị điện tử - 15 tấn</p>
-      <p className="text-sm text-slate-600">📍 Kho hàng Cầu Giấy, Hà Nội</p>
-      <p className="text-sm text-slate-600">🎯 Kho Liên Chiểu, Đà Nẵng</p>
-      <p className="text-sm text-slate-600">🗓 Giao: 08/05/2026</p>
-
-      <button className="w-full mt-4 bg-orange-600 text-white rounded-xl py-3 font-bold">
-        Phân công xe
-      </button>
-    </div>
-  );
-}
-
-function PlanVehicleCard({
-  plate,
-  name,
-}: {
-  plate: string;
-  name: string;
-}) {
-  return (
-    <div className="border rounded-xl p-4 mb-4 flex gap-4">
-      <div className="bg-orange-100 text-orange-600 p-3 rounded-xl h-fit">
-        <Truck size={22} />
-      </div>
-
-      <div>
-        <h4 className="font-bold">{plate}</h4>
-        <p>{name}</p>
-        <p>Tải trọng: 20 tấn</p>
-        <p>Tài xế: Nguyễn Văn A</p>
-
-        <span className="inline-block mt-2 bg-green-100 text-green-700 px-3 py-1 rounded-lg text-sm">
-          Sẵn sàng
-        </span>
-      </div>
-      
-    </div>
-  );
-}
-
-
-
 function Input({
   label,
   value,
@@ -786,6 +762,29 @@ function Input({
   );
 }
 
+function ReadOnlyAmountInput({
+  label,
+  value,
+  helper,
+}: {
+  label: string;
+  value: number;
+  helper?: string;
+}) {
+  return (
+    <div>
+      <label className="text-sm font-semibold text-slate-700">{label}</label>
+      <input
+        type="text"
+        className="w-full border border-slate-300 rounded-xl px-4 py-3 mt-1 bg-slate-100 text-slate-800 font-bold outline-none"
+        value={formatMoney(value)}
+        readOnly
+      />
+      {helper && <p className="text-xs text-slate-500 mt-1">{helper}</p>}
+    </div>
+  );
+}
+
 function Select({
   label,
   value,
@@ -795,7 +794,7 @@ function Select({
   label: string;
   value: string | number;
   onChange: (value: string) => void;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
     <div>
