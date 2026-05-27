@@ -10,6 +10,7 @@ import {
   Users,
   MapPin,
   DollarSign,
+  Settings,
 } from "lucide-react";
 
 const menuItems = [
@@ -64,6 +65,11 @@ const menuItems = [
     path: "/admin/reports",
     icon: BarChart3,
   },
+  {
+  label: "Quản trị hệ thống",
+  path: "/admin/system",
+  icon: Settings,
+}
 ];
 
 export default function Sidebar() {

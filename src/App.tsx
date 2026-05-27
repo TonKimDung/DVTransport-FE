@@ -17,6 +17,7 @@ import SemReport from "./pages/SemReport";
 import RevenueReport from "./pages/RevenueReport";
 import CostPage from "./pages/CostPage";
 import LegalDocumentPage from "./pages/LegalDocumentPage";
+import SystemManagementPage from "./pages/SystemManagementPage";
 
 function App() {
   return (
@@ -50,6 +51,8 @@ function App() {
               />
             }
           />
+
+          <Route path="system" element={<SystemManagementPage />} />
 
           <Route
             path="dashboard"
