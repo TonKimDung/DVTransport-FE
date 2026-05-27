@@ -5,4 +5,5 @@ export interface RouteItem {
   endLocation: string;
   distanceKm: number;
   estimatedHours: number;
+  costPerTon: number;
 }

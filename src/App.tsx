@@ -8,7 +8,6 @@ import {
 import AdminLayout from "./layouts/AdminLayout";
 import DashboardPage from "./pages/Dashboard";
 import Vehicle from "./pages/Vehicles";
-import LoginPage from "./pages/LoginPage";
 import FuelPage from "./pages/FuelPage";
 import OrderPage from "./pages/OrderPage";
 import TripPage from "./pages/TripPage";
@@ -16,6 +15,8 @@ import RecruitmentPage from "./pages/RecruitmentPage";
 import IncidentPage from "./pages/IncidentPage";
 import SemReport from "./pages/SemReport";
 import RevenueReport from "./pages/RevenueReport";
+import CostPage from "./pages/CostPage";
+import LegalDocumentPage from "./pages/LegalDocumentPage";
 
 function App() {
   return (
@@ -33,11 +34,7 @@ function App() {
           }
         />
 
-        {/* login */}
-        <Route
-          path="/login"
-          element={<LoginPage />}
-        />
+        
 
         {/* admin layout */}
         <Route
@@ -75,6 +72,11 @@ function App() {
           />
 
           <Route
+            path="cost"
+            element={<CostPage />}
+          />
+
+          <Route
             path="trips"
             element={<TripPage />}
           />
@@ -82,6 +84,11 @@ function App() {
           <Route
             path="recruitment"
             element={<RecruitmentPage />}
+          />
+
+          <Route
+            path="documents"
+            element={<LegalDocumentPage />}
           />
 
           <Route

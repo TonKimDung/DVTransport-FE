@@ -9,6 +9,7 @@ import {
   Truck,
   Users,
   MapPin,
+  DollarSign,
 } from "lucide-react";
 
 const menuItems = [
@@ -41,6 +42,12 @@ const menuItems = [
     label: "Đơn vận chuyển",
     path: "/admin/orders",
     icon: ClipboardList,
+  },
+
+  {
+    label: "Chi phí",
+    path: "/admin/cost",
+    icon: DollarSign,
   },
   {
     label: "An toàn & rủi ro",
