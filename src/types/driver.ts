@@ -18,7 +18,6 @@ export interface CreateDriverRequest {
   phone: string;
   email: string;
   address: string;
-
   licenseNumber: string;
   licenseExpiry: string;
 }
@@ -29,6 +28,8 @@ export interface UpdateDriverRequest {
   email: string;
   address: string;
 
+  userId: number | null;
+  licenseNumber: string;
   licenseExpiry: string;
 
   status: string;
