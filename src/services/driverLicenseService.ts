@@ -32,9 +32,10 @@ export const driverLicenseService = {
         "/driver-licenses"
       );
 
-    return res.data;
+    return Array.isArray(res.data)
+      ? res.data
+      : res.data.content || [];
   },
-
   // =========================
   // GET BY ID
   // =========================
