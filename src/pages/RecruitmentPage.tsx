@@ -26,6 +26,7 @@ import DriverDetailModal from "../components/recruitment/DriverDetailModal";
 import EditDriverModal from "../components/recruitment/EditDriverModal";
 
 import useRecruitmentData from "../hooks/useRecruitmentData";
+import WorkLogList from "../components/recruitment/cards/WorkLogList";
 
 export default function RecruitmentPage() {
   const {
@@ -599,13 +600,25 @@ export default function RecruitmentPage() {
             {!loading &&
               assignmentTab ===
                 "work" && (
-                <div className="space-y-5">
+                <>
+
+                  {workLogs.length >
+                    0 && (
+
+                    <WorkLogList
+                      workLogs={
+                        workLogs
+                      }
+                    />
+                  )}
+
                   {workLogs.length ===
                     0 && (
+
                     <EmptyState text="Không có dữ liệu giờ làm việc" />
                   )}
-                </div>
-              )}
+                </>
+            )}
           </>
         )}
       </div>

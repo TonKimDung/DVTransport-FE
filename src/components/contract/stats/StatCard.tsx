@@ -7,7 +7,7 @@ export default function StatCard({
   icon: React.ReactNode;
   title: string;
   value: number | string;
-  color: "blue" | "yellow" | "orange" | "green" | "purple" | "red";
+  color: "blue" | "green" | "yellow" | "red";
 }) {
   const colorMap = {
     blue: "bg-blue-100 text-blue-600",
