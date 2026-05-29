@@ -50,6 +50,16 @@ const pageConfig: Record<
     title: "Tuyển dụng",
     subtitle: "Quản lý chiến dịch tuyển dụng",
   },
+
+  "/admin/system": {
+  title: "Quản trị hệ thống",
+  subtitle: "Quản lý tài khoản, vai trò và nhật ký hệ thống",
+},
+
+"/admin/cost": {
+  title: "Chi phí",
+  subtitle: "Quản lý chi phí, tiền lương",
+},
 };
 
 export default function AdminLayout() {

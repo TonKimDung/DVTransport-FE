@@ -9,6 +9,8 @@ import {
   Truck,
   Users,
   MapPin,
+  DollarSign,
+  Settings,
 } from "lucide-react";
 
 const menuItems = [
@@ -42,6 +44,12 @@ const menuItems = [
     path: "/admin/orders",
     icon: ClipboardList,
   },
+
+  {
+    label: "Chi phí",
+    path: "/admin/cost",
+    icon: DollarSign,
+  },
   {
     label: "An toàn & rủi ro",
     path: "/admin/incidents",
@@ -57,6 +65,11 @@ const menuItems = [
     path: "/admin/reports",
     icon: BarChart3,
   },
+  {
+  label: "Quản trị hệ thống",
+  path: "/admin/system",
+  icon: Settings,
+}
 ];
 
 export default function Sidebar() {

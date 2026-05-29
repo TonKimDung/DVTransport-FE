@@ -15,6 +15,7 @@ export default function AppRoutes() {
         <Route path="fuel" element={<EmptyPage title="Nhiên liệu" />} />
         <Route path="trips" element={<EmptyPage title="Quản lý chuyến xe" />} />
         <Route path="orders" element={<EmptyPage title="Đơn vận chuyển" />} />
+        <Route path="cost" element={<EmptyPage title="Chi phí" />}/>
         <Route path="risks" element={<EmptyPage title="An toàn & rủi ro" />} />
         <Route path="documents" element={<EmptyPage title="Chứng từ & pháp lý" />} />
         <Route path="reports" element={<EmptyPage title="Báo cáo và thống kê" />} />

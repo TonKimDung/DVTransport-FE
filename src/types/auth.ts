@@ -1,6 +1,13 @@
-export interface UserInfo {
-  id?: number;
-  username?: string;
-  fullName: string;
-  roleName?: string;
+export interface LoginRequest {
+  username: string;
+  password: string;
 }
+
+export interface LoginResponse {
+  token: string;
+    userId: number;
+    username?: string;
+    fullName: string;
+    email: string;
+    roleName?: string;
+  }
