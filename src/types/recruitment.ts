@@ -26,7 +26,11 @@ export interface JobApplication {
   experienceYears: number;
   status: string;
   createdAt: string;
-
+  licenseNumber: string;
+  licenseExpiry: string;
+  licenseClass: string;
+  licenseImage: string;
+  licenseIssueDate: string;
   campaignId: number;
   campaignName: string;
 }
@@ -38,7 +42,11 @@ export interface JobApplicationRequest {
   phone: string;
   email: string;
   address: string;
-
+  licenseNumber: string;
+  licenseExpiry: string;
   experienceYears: number;
+  licenseClass: string;
+  licenseImage: string;
+  licenseIssueDate: string;
   status: string;
 }
