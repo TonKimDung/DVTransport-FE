@@ -4,17 +4,13 @@ import {
   useState,
 } from "react";
 
-import { recruitmentService }
-from "../services/recruitmentService";
+import { recruitmentService } from "../services/recruitmentService";
 
-import { driverService }
-from "../services/driverService";
+import { driverService } from "../services/driverService";
 
-import { assignmentService }
-from "../services/assignmentService";
+import { assignmentService } from "../services/assignmentService";
 
-import { vehicleService }
-from "../services/vehicleService";
+import { vehicleService } from "../services/vehicleService";
 
 import type {
   RecruitmentCampaign,
@@ -39,10 +35,11 @@ import type {
   AssignmentTab,
 } from "../types/recruitment/mainTab";
 
-import type {
-  WorkLog,
-} from "../types/recruitment/workLog";
 import { driverLicenseService } from "../services/driverLicenseService";
+
+import { driverWorkLogService } from "../services/driverWorkLogService";
+import type { DriverWorkLog } from "../types/driverWorkLog";
+import useDriverWorkLogRealtime from "./useDriverWorkLogRealtime";
 
 export default function useRecruitmentData() {
 
@@ -114,14 +111,11 @@ export default function useRecruitmentData() {
       []
     );
 
+  const [workLogs, setWorkLogs] = useState<DriverWorkLog[]>([]);
+
   const [availableVehicles,
     setAvailableVehicles] =
     useState<any[]>([]);
-
-  const [workLogs] =
-    useState<
-      WorkLog[]
-    >([]);
 
   // =====================
   // MODAL
@@ -173,9 +167,28 @@ export default function useRecruitmentData() {
     setSelectedCampaign,
   ] = useState("");
 
+  const loadWorkLogs =
+  async () => {
+
+    try {
+
+      const data =
+        await driverWorkLogService.getAll();
+
+      setWorkLogs(data);
+
+    } catch (err) {
+
+      console.error(err);
+    }
+  };
   // =====================
   // LOAD
   // =====================
+
+  useDriverWorkLogRealtime({
+    setWorkLogs,
+  });
 
   useEffect(() => {
     loadData();
@@ -206,8 +219,8 @@ export default function useRecruitmentData() {
         vehicleRes,
         availableDriverRes,
         availableVehicleRes,
-      ] =
-        await Promise.all([
+        workLogData,
+      ] = await Promise.all([
           recruitmentService.getCampaigns(),
 
           driverService.getAll(),
@@ -219,6 +232,8 @@ export default function useRecruitmentData() {
           driverService.getAvailable(),
 
           vehicleService.getAvailable(),
+          
+          driverWorkLogService.getAll(),
         ]);
 
       setCampaigns(
@@ -245,6 +260,12 @@ export default function useRecruitmentData() {
       setAvailableVehicles(
         availableVehicleRes ||
         []
+      );
+
+      setWorkLogs(
+        Array.isArray(workLogData)
+          ? workLogData
+          : []
       );
 
       await loadApplications();
