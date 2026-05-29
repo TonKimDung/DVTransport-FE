@@ -586,6 +586,9 @@ export default function useRecruitmentData() {
 
           status:
             "ACTIVE",
+          
+            fileUrl:
+            "",
         };
 
         console.log(
