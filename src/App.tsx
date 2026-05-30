@@ -18,97 +18,133 @@ import RevenueReport from "./pages/RevenueReport";
 import CostPage from "./pages/CostPage";
 import LegalDocumentPage from "./pages/LegalDocumentPage";
 import SystemManagementPage from "./pages/SystemManagementPage";
+import LoginPage from "./pages/LoginPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-
-        {/* redirect root */}
         <Route
           path="/"
-          element={
-            <Navigate
-              to="/admin/dashboard"
-              replace
-            />
-          }
+          element={<Navigate to="/admin/dashboard" replace />}
         />
 
-        
+        <Route path="/login" element={<LoginPage />} />
 
-        {/* admin layout */}
         <Route
           path="/admin"
-          element={<AdminLayout />}
+          element={
+            <ProtectedRoute>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
         >
+          <Route index element={<Navigate to="dashboard" replace />} />
+
+          <Route path="dashboard" element={<DashboardPage />} />
+
           <Route
-            index
+            path="system"
             element={
-              <Navigate
-                to="dashboard"
-                replace
-              />
+              <ProtectedRoute roles={["Admin"]}>
+                <SystemManagementPage />
+              </ProtectedRoute>
             }
-          />
-
-          <Route path="system" element={<SystemManagementPage />} />
-
-          <Route
-            path="dashboard"
-            element={<DashboardPage />}
           />
 
           <Route
             path="vehicles"
-            element={<Vehicle />}
+            element={
+              <ProtectedRoute roles={["Admin", "Điều phối viên"]}>
+                <Vehicle />
+              </ProtectedRoute>
+            }
           />
 
           <Route
             path="fuels"
-            element={<FuelPage />}
+            element={
+              <ProtectedRoute
+                roles={["Admin", "Điều phối viên", "Lái xe", "Kế toán"]}
+              >
+                <FuelPage />
+              </ProtectedRoute>
+            }
           />
 
           <Route
             path="orders"
-            element={<OrderPage />}
+            element={
+              <ProtectedRoute
+                roles={["Admin", "Điều phối viên", "Lái xe", "Kế toán"]}
+              >
+                <OrderPage />
+              </ProtectedRoute>
+            }
           />
 
           <Route
             path="cost"
-            element={<CostPage />}
+            element={
+              <ProtectedRoute roles={["Admin", "Điều phối viên", "Kế toán"]}>
+                <CostPage />
+              </ProtectedRoute>
+            }
           />
 
           <Route
             path="trips"
-            element={<TripPage />}
+            element={
+              <ProtectedRoute roles={["Admin", "Điều phối viên"]}>
+                <TripPage />
+              </ProtectedRoute>
+            }
           />
 
           <Route
             path="recruitment"
-            element={<RecruitmentPage />}
+            element={
+              <ProtectedRoute roles={["Admin", "HR"]}>
+                <RecruitmentPage />
+              </ProtectedRoute>
+            }
           />
 
           <Route
             path="documents"
-            element={<LegalDocumentPage />}
+            element={
+              <ProtectedRoute roles={["Admin", "Điều phối viên", "Kế toán"]}>
+                <LegalDocumentPage />
+              </ProtectedRoute>
+            }
           />
 
           <Route
             path="incidents"
-            element={<IncidentPage />}
+            element={
+              <ProtectedRoute roles={["Admin", "Điều phối viên", "Lái xe"]}>
+                <IncidentPage />
+              </ProtectedRoute>
+            }
           />
 
-          {/* SEM */}
           <Route
             path="reports"
-            element={<SemReport />}
+            element={
+              <ProtectedRoute roles={["Admin", "Kế toán"]}>
+                <SemReport />
+              </ProtectedRoute>
+            }
           />
 
-          {/* Revenue */}
           <Route
             path="revenue-report"
-            element={<RevenueReport />}
+            element={
+              <ProtectedRoute roles={["Admin", "Kế toán"]}>
+                <RevenueReport />
+              </ProtectedRoute>
+            }
           />
         </Route>
       </Routes>

@@ -13,70 +13,103 @@ import {
   Settings,
 } from "lucide-react";
 
+const ROLE = {
+  ADMIN: "Admin",
+  DIEU_PHOI_VIEN: "Điều phối viên",
+  HR: "HR",
+  LAI_XE: "Lái xe",
+  KE_TOAN: "Kế toán",
+};
+
 const menuItems = [
   {
     label: "Dashboard",
     path: "/",
     icon: Home,
+    roles: [ROLE.ADMIN, ROLE.DIEU_PHOI_VIEN, ROLE.HR, ROLE.LAI_XE, ROLE.KE_TOAN],
   },
   {
     label: "Tuyển dụng",
     path: "/admin/recruitment",
     icon: Users,
+    roles: [ROLE.ADMIN, ROLE.HR],
   },
   {
     label: "Phương tiện",
     path: "/admin/vehicles",
     icon: Truck,
+    roles: [ROLE.ADMIN, ROLE.DIEU_PHOI_VIEN],
   },
   {
     label: "Nhiên liệu",
     path: "/admin/fuels",
     icon: Fuel,
+    roles: [ROLE.ADMIN, ROLE.DIEU_PHOI_VIEN, ROLE.LAI_XE, ROLE.KE_TOAN],
   },
   {
     label: "Phân công",
     path: "/admin/trips",
     icon: MapPin,
+    roles: [ROLE.ADMIN, ROLE.DIEU_PHOI_VIEN],
   },
   {
     label: "Đơn vận chuyển",
     path: "/admin/orders",
     icon: ClipboardList,
+    roles: [ROLE.ADMIN, ROLE.DIEU_PHOI_VIEN, ROLE.LAI_XE, ROLE.KE_TOAN],
   },
-
   {
     label: "Chi phí",
     path: "/admin/cost",
     icon: DollarSign,
+    roles: [ROLE.ADMIN, ROLE.DIEU_PHOI_VIEN, ROLE.KE_TOAN],
   },
   {
     label: "An toàn & rủi ro",
     path: "/admin/incidents",
     icon: ShieldCheck,
+    roles: [ROLE.ADMIN, ROLE.DIEU_PHOI_VIEN, ROLE.LAI_XE],
   },
   {
     label: "Chứng từ & pháp lý",
     path: "/admin/documents",
     icon: FileText,
+    roles: [ROLE.ADMIN, ROLE.DIEU_PHOI_VIEN, ROLE.KE_TOAN],
   },
   {
     label: "Báo cáo và thống kê",
     path: "/admin/reports",
     icon: BarChart3,
+    roles: [ROLE.ADMIN, ROLE.KE_TOAN],
   },
   {
-  label: "Quản trị hệ thống",
-  path: "/admin/system",
-  icon: Settings,
-}
+    label: "Quản trị hệ thống",
+    path: "/admin/system",
+    icon: Settings,
+    roles: [ROLE.ADMIN],
+  },
 ];
 
+function getCurrentUserRole() {
+  try {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    return user.roleName || "";
+  } catch {
+    return "";
+  }
+}
+
 export default function Sidebar() {
+  const currentRole = getCurrentUserRole();
+
+  const allowedMenuItems = menuItems.filter((item) =>
+    item.roles.includes(currentRole)
+  );
+
   return (
     <aside className="w-[260px] min-h-screen bg-white border-r border-slate-200 px-4 py-5">
       <nav className="space-y-2">
-        {menuItems.map((item) => {
+        {allowedMenuItems.map((item) => {
           const Icon = item.icon;
 
           return (
