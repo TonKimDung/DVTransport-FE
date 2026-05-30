@@ -18,6 +18,7 @@ export interface UserRequest {
   phone: string;
   roleId: number;
   isActive: boolean;
+  driverId?: number;
 }
 
 export interface UserLog {

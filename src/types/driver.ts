@@ -1,6 +1,6 @@
 export interface Driver {
   id: number;
-
+  userId?: number | null;
   fullName: string;
   phone: string;
   email: string;

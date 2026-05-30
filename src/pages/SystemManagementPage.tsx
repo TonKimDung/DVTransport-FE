@@ -14,8 +14,11 @@ import {
 
 import { userService } from "../services/userService";
 import { roleService } from "../services/roleService";
+import { driverService } from "../services/driverService";
+
 import type { User, UserRequest } from "../types/user";
 import type { Role } from "../types/role";
+import type { Driver } from "../types/driver";
 
 interface UserLog {
   id: number;
@@ -34,6 +37,7 @@ const emptyForm: UserRequest = {
   phone: "",
   roleId: 0,
   isActive: true,
+  driverId: undefined,
 };
 
 export default function SystemManagementPage() {
@@ -41,6 +45,7 @@ export default function SystemManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [logs, setLogs] = useState<UserLog[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
   const [search, setSearch] = useState("");
   const [openForm, setOpenForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -50,6 +55,7 @@ export default function SystemManagementPage() {
     loadUsers();
     loadRoles();
     loadLogs();
+    loadDrivers();
   }, []);
 
   const loadUsers = async () => {
@@ -81,6 +87,15 @@ export default function SystemManagementPage() {
     }
   };
 
+  const loadDrivers = async () => {
+    try {
+      const data = await driverService.getAll();
+      setDrivers(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const filteredUsers = useMemo(() => {
     return users.filter((user) =>
       `${user.username} ${user.fullName} ${user.email} ${user.roleName}`
@@ -96,12 +111,25 @@ export default function SystemManagementPage() {
     }));
   }, [roles, users]);
 
-  const adminCount = users.filter((u) => u.roleName === "ADMIN").length;
+  const adminCount = users.filter((u) => u.roleName === "Admin").length;
   const activeCount = users.filter((u) => u.isActive).length;
   const lockedCount = users.filter((u) => !u.isActive).length;
 
   const handleSubmit = async () => {
     try {
+      const selectedRole = roles.find((role) => role.id === Number(form.roleId));
+      const isDriverRole = selectedRole?.roleName === "Lái xe";
+
+      if (!form.roleId) {
+        alert("Vui lòng chọn vai trò");
+        return;
+      }
+
+      if (isDriverRole && !editingId && !form.driverId) {
+        alert("Vui lòng chọn tài xế để gắn tài khoản");
+        return;
+      }
+
       if (!form.username.trim()) {
         alert("Vui lòng nhập tên đăng nhập");
         return;
@@ -109,11 +137,6 @@ export default function SystemManagementPage() {
 
       if (!editingId && !form.password?.trim()) {
         alert("Vui lòng nhập mật khẩu");
-        return;
-      }
-
-      if (!form.roleId) {
-        alert("Vui lòng chọn vai trò");
         return;
       }
 
@@ -126,6 +149,8 @@ export default function SystemManagementPage() {
       setOpenForm(false);
       setEditingId(null);
       setForm(emptyForm);
+
+      loadDrivers();
       loadUsers();
       loadLogs();
     } catch (error) {
@@ -144,6 +169,7 @@ export default function SystemManagementPage() {
       phone: user.phone,
       roleId: user.roleId,
       isActive: user.isActive,
+      driverId: undefined,
     });
     setOpenForm(true);
   };
@@ -169,6 +195,7 @@ export default function SystemManagementPage() {
 
     try {
       await userService.delete(id);
+      loadDrivers();
       loadUsers();
       loadLogs();
     } catch (error) {
@@ -226,6 +253,7 @@ export default function SystemManagementPage() {
               onClick={() => {
                 setEditingId(null);
                 setForm(emptyForm);
+                loadDrivers();
                 setOpenForm(true);
               }}
               className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2"
@@ -396,6 +424,7 @@ export default function SystemManagementPage() {
           form={form}
           setForm={setForm}
           roles={roles}
+          drivers={drivers}
           editingId={editingId}
           onClose={() => {
             setOpenForm(false);
@@ -413,6 +442,7 @@ function UserFormModal({
   form,
   setForm,
   roles,
+  drivers,
   editingId,
   onClose,
   onSubmit,
@@ -420,13 +450,47 @@ function UserFormModal({
   form: UserRequest;
   setForm: React.Dispatch<React.SetStateAction<UserRequest>>;
   roles: Role[];
+  drivers: Driver[];
   editingId: number | null;
   onClose: () => void;
   onSubmit: () => void;
 }) {
+  const selectedRole = roles.find((role) => role.id === Number(form.roleId));
+  const isDriverRole = selectedRole?.roleName === "Lái xe";
+
+  const driversWithoutAccount = drivers.filter((driver) => {
+    const driverAny = driver as any;
+    return !driverAny.userId && !driverAny.user;
+  });
+
+  const handleSelectRole = (roleId: number) => {
+    setForm({
+      ...form,
+      roleId,
+      driverId: undefined,
+      fullName: "",
+      email: "",
+      phone: "",
+    });
+  };
+
+  const handleSelectDriver = (driverId: number) => {
+    const selectedDriver = drivers.find((driver) => driver.id === driverId);
+
+    if (!selectedDriver) return;
+
+    setForm({
+      ...form,
+      driverId: selectedDriver.id,
+      fullName: selectedDriver.fullName || "",
+      email: selectedDriver.email || "",
+      phone: selectedDriver.phone || "",
+    });
+  };
+
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex justify-center items-start pt-10">
-      <div className="bg-white w-[800px] rounded-2xl shadow-xl">
+      <div className="bg-white w-[850px] rounded-2xl shadow-xl">
         <div className="p-6 border-b flex justify-between items-center">
           <h2 className="text-xl font-bold">
             {editingId ? "Cập nhật tài khoản" : "Tạo tài khoản mới"}
@@ -438,6 +502,35 @@ function UserFormModal({
         </div>
 
         <div className="p-6 grid grid-cols-2 gap-5">
+          <Select
+            label="Vai trò"
+            value={form.roleId}
+            onChange={(v) => handleSelectRole(Number(v))}
+            disabled={!!editingId}
+          >
+            <option value={0}>-- Chọn vai trò trước --</option>
+            {roles.map((role) => (
+              <option key={role.id} value={role.id}>
+                {role.roleName}
+              </option>
+            ))}
+          </Select>
+
+          {isDriverRole && !editingId && (
+            <Select
+              label="Chọn tài xế chưa có tài khoản"
+              value={form.driverId || 0}
+              onChange={(v) => handleSelectDriver(Number(v))}
+            >
+              <option value={0}>-- Chọn tài xế --</option>
+              {driversWithoutAccount.map((driver) => (
+                <option key={driver.id} value={driver.id}>
+                  {driver.fullName} - {driver.phone || "Chưa có SĐT"}
+                </option>
+              ))}
+            </Select>
+          )}
+
           <Input
             label="Tên đăng nhập"
             value={form.username}
@@ -455,32 +548,22 @@ function UserFormModal({
             label="Họ tên"
             value={form.fullName}
             onChange={(v) => setForm({ ...form, fullName: v })}
+            disabled={isDriverRole}
           />
 
           <Input
             label="Email"
             value={form.email}
             onChange={(v) => setForm({ ...form, email: v })}
+            disabled={isDriverRole}
           />
 
           <Input
             label="Số điện thoại"
             value={form.phone}
             onChange={(v) => setForm({ ...form, phone: v })}
+            disabled={isDriverRole}
           />
-
-          <Select
-            label="Vai trò"
-            value={form.roleId}
-            onChange={(v) => setForm({ ...form, roleId: Number(v) })}
-          >
-            <option value={0}>-- Chọn vai trò --</option>
-            {roles.map((role) => (
-              <option key={role.id} value={role.id}>
-                {role.roleName}
-              </option>
-            ))}
-          </Select>
 
           <Select
             label="Trạng thái"
@@ -491,6 +574,13 @@ function UserFormModal({
             <option value="false">Khóa</option>
           </Select>
         </div>
+
+        {isDriverRole && !editingId && (
+          <div className="px-6 pb-2 text-sm text-slate-500">
+            Khi chọn tài xế, hệ thống sẽ tự điền họ tên, email và số điện thoại từ hồ sơ tài xế.
+            Admin chỉ cần nhập tên đăng nhập và mật khẩu.
+          </div>
+        )}
 
         <div className="p-6 border-t flex justify-end gap-3">
           <button onClick={onClose} className="px-6 py-3 rounded-xl border">
@@ -569,18 +659,23 @@ function Input({
   value,
   onChange,
   type = "text",
+  disabled = false,
 }: {
   label: string;
   value: string | number;
   onChange: (value: string) => void;
   type?: string;
+  disabled?: boolean;
 }) {
   return (
     <div>
       <label className="text-sm font-semibold text-slate-700">{label}</label>
       <input
         type={type}
-        className="w-full border border-slate-300 rounded-xl px-4 py-3 mt-1 outline-none focus:ring-2 focus:ring-orange-300"
+        disabled={disabled}
+        className={`w-full border border-slate-300 rounded-xl px-4 py-3 mt-1 outline-none focus:ring-2 focus:ring-orange-300 ${
+          disabled ? "bg-slate-100 text-slate-500 cursor-not-allowed" : ""
+        }`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />
@@ -593,17 +688,22 @@ function Select({
   value,
   onChange,
   children,
+  disabled = false,
 }: {
   label: string;
   value: string | number;
   onChange: (value: string) => void;
   children: React.ReactNode;
+  disabled?: boolean;
 }) {
   return (
     <div>
       <label className="text-sm font-semibold text-slate-700">{label}</label>
       <select
-        className="w-full border border-slate-300 rounded-xl px-4 py-3 mt-1 outline-none focus:ring-2 focus:ring-orange-300"
+        disabled={disabled}
+        className={`w-full border border-slate-300 rounded-xl px-4 py-3 mt-1 outline-none focus:ring-2 focus:ring-orange-300 ${
+          disabled ? "bg-slate-100 text-slate-500 cursor-not-allowed" : ""
+        }`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >
