@@ -31,6 +31,7 @@ import type {
   VehicleDocument,
   VehicleDocumentRequest,
 } from "../types/vehicleDocument";
+import ContractManagementPage from "./ContractManagementPage";
 
 type TabType = "documents" | "contracts";
 type ModalType = "driverLicense" | "vehicleDocument" | null;
@@ -244,7 +245,7 @@ const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
       {activeTab === "contracts" ? (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-10 text-center text-slate-500">
-          Tab quản lý hợp đồng để trống.
+            <ContractManagementPage />
         </div>
       ) : (
         <>

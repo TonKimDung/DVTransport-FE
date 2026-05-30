@@ -93,4 +93,13 @@ export const driverService =
 
         return res.data;
       },
+
+      async getAvailableContract() {
+        const res =
+          await axiosClient.get(
+            "/drivers/available-contract"
+          );
+
+        return res.data;
+      },
   };

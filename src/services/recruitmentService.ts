@@ -6,6 +6,7 @@ import type {
   JobApplication,
   JobApplicationRequest,
 } from "../types/recruitment";
+import type { ApplicationStatus } from "../types/status/applicationStatus";
 
 export const recruitmentService = {
   // ================= CAMPAIGN =================
@@ -117,21 +118,22 @@ export const recruitmentService = {
   },
 
   updateApplicationStatus:
-    async (
-      id: number,
-      status: string
-    ): Promise<JobApplication> => {
-      const res =
-        await axiosClient.put(
-          `/job-applications/${id}/status`,
-          null,
-          {
-            params: {
-              status,
-            },
-          }
-        );
+  async (
+    id: number,
+    status: ApplicationStatus
+  ): Promise<JobApplication> => {
 
-      return res.data;
-    },
+    const res =
+      await axiosClient.put(
+        `/job-applications/${id}/status`,
+        null,
+        {
+          params: {
+            status,
+          },
+        }
+      );
+
+    return res.data;
+  },
 };

@@ -1,604 +1,174 @@
-import { useEffect, useMemo, useState } from "react";
 import {
-  Calendar,
   ChevronDown,
   Clock3,
-  CreditCard,
   FileText,
-  Mail,
-  MapPin,
-  MoreVertical,
-  Phone,
-  Plus,
   Truck,
   UserCog,
   Users,
 } from "lucide-react";
 
-import { recruitmentService } from "../services/recruitmentService";
-import { driverService } from "../services/driverService";
-import { assignmentService } from "../services/assignmentService";
-import { vehicleService } from "../services/vehicleService";
+import RecruitmentCard from "../components/recruitment/cards/RecruitmentCard";
+import DriverCard from "../components/recruitment/cards/DriverCard";
+import ApplicationCard from "../components/recruitment/cards/ApplicationCard";
+import AssignmentCard from "../components/recruitment/cards/AssignmentCard";
 
-import type {
-  RecruitmentCampaign,
-  JobApplication,
-} from "../types/recruitment";
-
-import type { Driver } from "../types/driver";
-
-import type { Assignment } from "../types/assignment";
+import TopBar from "../components/recruitment/common/TopBar";
+import MainTabButton from "../components/recruitment/common/MainTabButton";
+import SubTabButton from "../components/recruitment/common/SubTabButton";
+import EmptyState from "../components/recruitment/common/EmptyState";
+import StatsGrid from "../components/recruitment/common/StatsGrid";
+import StatCard from "../components/recruitment/common/StatCard";
 
 import CreateCampaignModal from "../components/recruitment/CreateCampaignModal";
 import AddDriverModal from "../components/recruitment/AddDriverModal";
 import CreateAssignmentModal from "../components/recruitment/CreateAssignmentModal";
 import DriverDetailModal from "../components/recruitment/DriverDetailModal";
 import EditDriverModal from "../components/recruitment/EditDriverModal";
-import React from "react";
 
-type MainTab =
-  | "recruitment"
-  | "drivers"
-  | "assignment";
-
-type RecruitTab =
-  | "campaign"
-  | "application";
-
-type AssignmentTab =
-  | "vehicle"
-  | "work";
-
-interface WorkLog {
-  id: number;
-  driverName: string;
-  workDate: string;
-  workingHours: number;
-  tripCount: number;
-  vehiclePlate: string;
-}
+import useRecruitmentData from "../hooks/useRecruitmentData";
+import WorkLogList from "../components/recruitment/cards/WorkLogList";
 
 export default function RecruitmentPage() {
-  const [mainTab, setMainTab] =
-    useState<MainTab>("recruitment");
+  const {
+    // tabs
+    mainTab,
+    setMainTab,
 
-  const [recruitTab, setRecruitTab] =
-    useState<RecruitTab>("campaign");
+    recruitTab,
+    setRecruitTab,
 
-  const [assignmentTab,
-    setAssignmentTab] =
-    useState<AssignmentTab>(
-      "vehicle"
-    );
+    assignmentTab,
+    setAssignmentTab,
 
-  const [loading, setLoading] =
-    useState(false);
+    // loading
+    loading,
 
-  // ================= DATA =================
+    // data
+    campaigns,
+    applications,
+    drivers,
+    assignments,
+    availableDrivers,
+    availableVehicles,
+    workLogs,
 
-  const [campaigns, setCampaigns] =
-    useState<
-      RecruitmentCampaign[]
-    >([]);
-
-  const [applications,
-    setApplications] =
-    useState<JobApplication[]>(
-      []
-    );
-
-  const [drivers, setDrivers] =
-    useState<Driver[]>([]);
-
-  const [assignments,
-    setAssignments] =
-    useState<Assignment[]>(
-      []
-    );
-
-  const [vehicles,
-    setVehicles] =
-    useState<any[]>([]);
-
-    const [availableDrivers,
-        setAvailableDrivers] =
-        useState<Driver[]>([]);
-
-    const [availableVehicles,
-        setAvailableVehicles] =
-        useState<any[]>([]);
-
-  const [workLogs] = useState<
-    WorkLog[]
-  >([]);
-
-  const [
-  openEditDriverModal,
-  setOpenEditDriverModal,
-] = useState(false);
-
-const [
-  openDriverDetailModal,
-  setOpenDriverDetailModal,
-] = useState(false);
-
-const [
-  selectedDriver,
-  setSelectedDriver,
-] = useState<Driver | null>(
-  null
-);
-
-  // ================= FILTER =================
-
-  const [
-    selectedCampaign,
-    setSelectedCampaign,
-  ] = useState("");
-
-  // ================= MODAL =================
-
-  const [
+    // modal
     openCampaignModal,
     setOpenCampaignModal,
-  ] = useState(false);
 
-  const [
     openDriverModal,
     setOpenDriverModal,
-  ] = useState(false);
 
-  const [
     openAssignmentModal,
     setOpenAssignmentModal,
-  ] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+    openEditDriverModal,
+    setOpenEditDriverModal,
 
-  useEffect(() => {
+    openDriverDetailModal,
+    setOpenDriverDetailModal,
+
+    // selected
+    selectedDriver,
+    setSelectedDriver,
+
+    // filter
+    selectedCampaign,
+    setSelectedCampaign,
+
+    // stats
+    recruitmentStats,
+    driverStats,
+    totalCount,
+
+    // actions
+    handleCloseCampaign,
+    handleUpdateApplicationStatus,
+    handleInactiveDriver,
+    handleDeactivateAssignment,
+
+    // reload
+    loadData,
+  } = useRecruitmentData();
+
+  const handleTopAction = () => {
     if (
-      recruitTab ===
-      "application"
+      mainTab === "recruitment" &&
+      recruitTab === "campaign"
     ) {
-      loadApplications();
-    }
-  }, [selectedCampaign]);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-
-      const [
-        campaignRes,
-        driverRes,
-        assignmentRes,
-        vehicleRes,
-        availableDriverRes,
-        availableVehicleRes,
-        ] = await Promise.all([
-        recruitmentService.getCampaigns(),
-        driverService.getAll(),
-        assignmentService.getAll(),
-        vehicleService.getAll(),
-
-        // mới
-        driverService.getAvailable(),
-        vehicleService.getAvailable(),
-        ]);
-
-        setAvailableDrivers(
-            availableDriverRes || []
-        );
-
-        setAvailableVehicles(
-            availableVehicleRes || []
-        );
-
-        setCampaigns(
-            campaignRes || []
-        );
-
-
-        setVehicles(
-            vehicleRes || []
-        );
-
-        setDrivers(
-            driverRes || []
-        );
-
-        setAssignments(
-            assignmentRes || []
-        );
-      await loadApplications();
-    } catch (error) {
-      console.error(error);
-
-      alert(
-        "Không thể tải dữ liệu"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadApplications =
-    async () => {
-      try {
-        let data:
-          | JobApplication[]
-          = [];
-
-        if (
-          selectedCampaign
-        ) {
-          data =
-            await recruitmentService.getApplicationsByCampaign(
-              Number(
-                selectedCampaign
-              )
-            );
-        } else {
-          data =
-            await recruitmentService.getApplications();
-        }
-
-        setApplications(
-          data || []
-        );
-      } catch (error) {
-        console.error(
-          error
-        );
-      }
-    };
-
-  // ================= TOTAL =================
-
-  const totalCount =
-    useMemo(() => {
-      if (
-        mainTab ===
-          "recruitment" &&
-        recruitTab ===
-          "campaign"
-      ) {
-        return `${campaigns.length} đợt tuyển dụng`;
-      }
-
-      if (
-        mainTab ===
-          "recruitment" &&
-        recruitTab ===
-          "application"
-      ) {
-        return `${applications.length} hồ sơ`;
-      }
-
-      if (
-        mainTab ===
-        "drivers"
-      ) {
-        return `${drivers.length} tài xế`;
-      }
-
-      if (
-        mainTab ===
-          "assignment" &&
-        assignmentTab ===
-          "vehicle"
-      ) {
-        return `${assignments.length} phân công`;
-      }
-
-      return `${workLogs.length} bản ghi`;
-    }, [
-      mainTab,
-      recruitTab,
-      assignmentTab,
-      campaigns.length,
-      applications.length,
-      drivers.length,
-      assignments.length,
-      workLogs.length,
-    ]);
-
-    // ================= STATS =================
-
-const recruitmentStats = useMemo(() => {
-  const activeCampaigns = campaigns.filter(
-    (c) =>
-      c.status?.toUpperCase() ===
-      "ACTIVE"
-  ).length;
-
-  const approvedApplications =
-    applications.filter(
-      (a) => {
-        const status =
-          a.status?.toUpperCase();
-
-        return (
-          status ===
-            "APPROVED" ||
-          status ===
-            "REJECTED"
-        );
-      }
-    ).length;
-
-  return {
-    totalCampaigns:
-      campaigns.length,
-
-    activeCampaigns,
-
-    totalApplications:
-      applications.length,
-
-    approvedApplications,
-  };
-}, [
-  campaigns,
-  applications,
-]);
-
-const driverStats = useMemo(() => {
-  const activeDrivers = drivers.filter(
-    (d) => d.status?.toUpperCase() === "ACTIVE"
-  ).length;
-
-  const availableDrivers = drivers.filter(
-    (d: any) => d.isAvailable === true
-  ).length;
-
-  return {
-    totalDrivers: drivers.length,
-    activeDrivers,
-    availableDrivers,
-  };
-}, [drivers]);
-
-  const handleTopAction =
-    () => {
-      if (
-        mainTab ===
-          "recruitment" &&
-        recruitTab ===
-          "campaign"
-      ) {
-        setOpenCampaignModal(
-          true
-        );
-
-        return;
-      }
-
-      if (
-        mainTab ===
-        "drivers"
-      ) {
-        setOpenDriverModal(
-          true
-        );
-
-        return;
-      }
-
-      if (
-        mainTab ===
-          "assignment" &&
-        assignmentTab ===
-          "vehicle"
-      ) {
-        setOpenAssignmentModal(
-          true
-        );
-      }
-    };
-
-    
-const handleCloseCampaign =
-    async (
-        id: number
-    ) => {
-        const ok =
-        confirm(
-            "Đóng tuyển dụng?"
-        );
-
-        if (!ok)
-        return;
-
-        try {
-        await recruitmentService.closeCampaign(
-            id
-        );
-
-        alert(
-            "Đã đóng tuyển"
-        );
-
-        loadData();
-        } catch {
-        alert(
-            "Không thể cập nhật"
-        );
-        }
-};
-
-const handleUpdateApplicationStatus =
-  async (
-    id: number,
-    status: string
-  ) => {
-    try {
-      await recruitmentService.updateApplicationStatus(
-        id,
-        status
-      );
-
-      alert(
-        "Đã cập nhật trạng thái"
-      );
-
-      loadApplications();
-    } catch {
-      alert(
-        "Không thể cập nhật"
-      );
-    }
-  };
-
-  const handleInactiveDriver =
-  async (
-    id: number
-  ) => {
-    const ok =
-      confirm(
-        "Ngừng hoạt động tài xế?"
-      );
-
-    if (!ok)
+      setOpenCampaignModal(true);
       return;
-
-    try {
-      await driverService.updateStatus(
-        id,
-        "INACTIVE"
-      );
-
-      alert(
-        "Đã cập nhật"
-      );
-
-      loadData();
-    } catch {
-      alert(
-        "Không thể cập nhật"
-      );
     }
-  };
 
-  const handleDeactivateAssignment =
-  async (
-    id: number
-  ) => {
-    const ok =
-      confirm(
-        "Kết thúc phân công?"
-      );
-
-    if (!ok)
+    if (mainTab === "drivers") {
+      setOpenDriverModal(true);
       return;
+    }
 
-    try {
-      await assignmentService.deactivate(
-        id
-      );
-
-      alert(
-        "Đã kết thúc phân công"
-      );
-
-      loadData();
-    } catch {
-      alert(
-        "Không thể cập nhật"
-      );
+    if (
+      mainTab === "assignment" &&
+      assignmentTab === "vehicle"
+    ) {
+      setOpenAssignmentModal(true);
     }
   };
+
   return (
     <>
       {/* ================= MODALS ================= */}
 
       <CreateCampaignModal
-        open={
-          openCampaignModal
-        }
+        open={openCampaignModal}
         onClose={() =>
-          setOpenCampaignModal(
-            false
-          )
+          setOpenCampaignModal(false)
         }
-        onSuccess={
-          loadData
-        }
+        onSuccess={loadData}
       />
 
       <EditDriverModal
-        open={
-            openEditDriverModal
-        }
+        open={openEditDriverModal}
         onClose={() =>
-            setOpenEditDriverModal(
-            false
-            )
+          setOpenEditDriverModal(false)
         }
         onSuccess={loadData}
         driver={selectedDriver}
-    />
+      />
 
-        <DriverDetailModal
-            open={
-                openDriverDetailModal
-            }
-            onClose={() =>
-                setOpenDriverDetailModal(
-                false
-                )
-            }
-            driver={selectedDriver}
-            />
+      <DriverDetailModal
+        open={openDriverDetailModal}
+        onClose={() =>
+          setOpenDriverDetailModal(false)
+        }
+        driver={selectedDriver}
+      />
 
       <AddDriverModal
-        open={
-          openDriverModal
-        }
+        open={openDriverModal}
         onClose={() =>
-          setOpenDriverModal(
-            false
-          )
+          setOpenDriverModal(false)
         }
-        onSuccess={
-          loadData
-        }
+        onSuccess={loadData}
       />
 
       <CreateAssignmentModal
         open={openAssignmentModal}
         onClose={() =>
-            setOpenAssignmentModal(false)
+          setOpenAssignmentModal(false)
         }
         onSuccess={loadData}
-        drivers={
-            availableDrivers
-        }
-        vehicles={
-            availableVehicles
-        }
-    />
+        drivers={availableDrivers}
+        vehicles={availableVehicles}
+      />
 
       <div className="space-y-7">
-
-        
-
-        {/* MAIN TAB */}
+        {/* ================= MAIN TAB ================= */}
 
         <div className="flex items-center gap-12 border-b border-slate-200">
-
           <MainTabButton
             active={
-              mainTab ===
-              "recruitment"
+              mainTab === "recruitment"
             }
-            icon={
-              <FileText
-                size={22}
-              />
-            }
+            icon={<FileText size={22} />}
             title="Tuyển dụng"
             onClick={() =>
               setMainTab(
@@ -609,32 +179,20 @@ const handleUpdateApplicationStatus =
 
           <MainTabButton
             active={
-              mainTab ===
-              "drivers"
+              mainTab === "drivers"
             }
-            icon={
-              <Users
-                size={22}
-              />
-            }
+            icon={<Users size={22} />}
             title="Tài xế"
             onClick={() =>
-              setMainTab(
-                "drivers"
-              )
+              setMainTab("drivers")
             }
           />
 
           <MainTabButton
             active={
-              mainTab ===
-              "assignment"
+              mainTab === "assignment"
             }
-            icon={
-              <UserCog
-                size={22}
-              />
-            }
+            icon={<UserCog size={22} />}
             title="Phân công tài xế"
             onClick={() =>
               setMainTab(
@@ -643,13 +201,12 @@ const handleUpdateApplicationStatus =
             }
           />
         </div>
-                {/* ================= RECRUITMENT ================= */}
+        {/* ================= RECRUITMENT ================= */}
 
         {mainTab ===
           "recruitment" && (
           <>
             <div className="flex items-center gap-10">
-
               <SubTabButton
                 active={
                   recruitTab ===
@@ -678,9 +235,7 @@ const handleUpdateApplicationStatus =
             </div>
 
             <TopBar
-              total={
-                totalCount
-              }
+              total={totalCount}
               buttonText={
                 recruitTab ===
                 "campaign"
@@ -695,53 +250,60 @@ const handleUpdateApplicationStatus =
                 "application"
               }
             />
-            {/* RECRUITMENT STATS */}
 
-            {mainTab === "recruitment" && (
+            {/* ================= STATS ================= */}
+
             <StatsGrid>
-                <StatCard
+              <StatCard
                 title="Đợt tuyển dụng"
                 value={
-                    recruitmentStats.totalCampaigns
+                  recruitmentStats.totalCampaigns
                 }
-                icon={<FileText />}
+                icon={
+                  <FileText />
+                }
                 color="bg-orange-100 text-orange-600"
-                />
+              />
 
-                <StatCard
+              <StatCard
                 title="Đang tuyển"
                 value={
-                    recruitmentStats.activeCampaigns
+                  recruitmentStats.activeCampaigns
                 }
-                icon={<Clock3 />}
+                icon={
+                  <Clock3 />
+                }
                 color="bg-green-100 text-green-600"
-                />
+              />
 
-                <StatCard
+              <StatCard
                 title="Hồ sơ ứng tuyển"
                 value={
-                    recruitmentStats.totalApplications
+                  recruitmentStats.totalApplications
                 }
-                icon={<Users />}
+                icon={
+                  <Users />
+                }
                 color="bg-blue-100 text-blue-600"
-                />
+              />
 
-                <StatCard
-                    title="Đã duyệt"
-                    value={
-                        recruitmentStats.approvedApplications
-                    }
-                    icon={<ChevronDown />}
-                    color="bg-green-100 text-green-600"
-                />
+              <StatCard
+                title="Đã duyệt"
+                value={
+                  recruitmentStats.approvedApplications
+                }
+                icon={
+                  <ChevronDown />
+                }
+                color="bg-green-100 text-green-600"
+              />
             </StatsGrid>
-            )}
 
             {loading && (
               <EmptyState text="Đang tải dữ liệu..." />
             )}
 
-            {/* CAMPAIGNS */}
+            {/* ================= CAMPAIGN ================= */}
 
             {!loading &&
               recruitTab ===
@@ -752,12 +314,16 @@ const handleUpdateApplicationStatus =
                       item
                     ) => (
                       <RecruitmentCard
-                        key={item.id}
-                        item={item}
-                        onClose={
-                            handleCloseCampaign
+                        key={
+                          item.id
                         }
-                    />
+                        item={
+                          item
+                        }
+                        onClose={
+                          handleCloseCampaign
+                        }
+                      />
                     )
                   )}
 
@@ -768,7 +334,7 @@ const handleUpdateApplicationStatus =
                 </div>
               )}
 
-            {/* APPLICATION */}
+            {/* ================= APPLICATION ================= */}
 
             {!loading &&
               recruitTab ===
@@ -784,16 +350,14 @@ const handleUpdateApplicationStatus =
                         e
                       ) =>
                         setSelectedCampaign(
-                          e
-                            .target
+                          e.target
                             .value
                         )
                       }
                       className="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-orange-300"
                     >
                       <option value="">
-                        Tất cả
-                        đợt tuyển dụng
+                        Tất cả đợt tuyển dụng
                       </option>
 
                       {campaigns.map(
@@ -808,9 +372,7 @@ const handleUpdateApplicationStatus =
                               c.id
                             }
                           >
-                            {
-                              c.title
-                            }
+                            {c.title}
                           </option>
                         )
                       )}
@@ -822,12 +384,16 @@ const handleUpdateApplicationStatus =
                       item
                     ) => (
                       <ApplicationCard
-                            key={item.id}
-                            item={item}
-                            onUpdateStatus={
-                                handleUpdateApplicationStatus
-                            }
-                        />
+                        key={
+                          item.id
+                        }
+                        item={
+                          item
+                        }
+                        onUpdateStatus={
+                          handleUpdateApplicationStatus
+                        }
+                      />
                     )
                   )}
 
@@ -839,8 +405,7 @@ const handleUpdateApplicationStatus =
               )}
           </>
         )}
-
-        {/* ================= DRIVER ================= */}
+                {/* ================= DRIVER ================= */}
 
         {mainTab ===
           "drivers" && (
@@ -856,42 +421,50 @@ const handleUpdateApplicationStatus =
             />
 
             <StatsGrid>
-                <StatCard
-                    title="Tổng tài xế"
-                    value={
-                    driverStats.totalDrivers
-                    }
-                    icon={<Users />}
-                    color="bg-blue-100 text-blue-600"
-                />
+              <StatCard
+                title="Tổng tài xế"
+                value={
+                  driverStats.totalDrivers
+                }
+                icon={
+                  <Users />
+                }
+                color="bg-blue-100 text-blue-600"
+              />
 
-                <StatCard
-                    title="Đang hoạt động"
-                    value={
-                    driverStats.activeDrivers
-                    }
-                    icon={<UserCog />}
-                    color="bg-green-100 text-green-600"
-                />
+              <StatCard
+                title="ACTIVE"
+                value={
+                  driverStats.activeDrivers
+                }
+                icon={
+                  <UserCog />
+                }
+                color="bg-green-100 text-green-600"
+              />
 
-                <StatCard
-                    title="Sẵn sàng nhận chuyến"
-                    value={
-                    driverStats.availableDrivers
-                    }
-                    icon={<Truck />}
-                    color="bg-orange-100 text-orange-600"
-                />
+              <StatCard
+                title="AVAILABLE"
+                value={
+                  driverStats.availableDrivers
+                }
+                icon={
+                  <Truck />
+                }
+                color="bg-orange-100 text-orange-600"
+              />
 
-                <StatCard
-                    title="Đang phân công"
-                    value={
-                        assignments.length
-                    }
-                    icon={<Clock3 />}
-                    color="bg-purple-100 text-purple-600"
-                />
-                </StatsGrid>
+              <StatCard
+                title="HAVE TRIP"
+                value={
+                  assignments.length
+                }
+                icon={
+                  <Clock3 />
+                }
+                color="bg-purple-100 text-purple-600"
+              />
+            </StatsGrid>
 
             {loading && (
               <EmptyState text="Đang tải dữ liệu..." />
@@ -899,35 +472,42 @@ const handleUpdateApplicationStatus =
 
             {!loading && (
               <div className="space-y-5">
-
                 {drivers.map(
                   (
                     item
                   ) => (
                     <DriverCard
-                        key={item.id}
-                        item={item}
-                        onEdit={(d) => {
-                            setSelectedDriver(
-                            d
-                            );
+                      key={
+                        item.id
+                      }
+                      item={
+                        item
+                      }
+                      onEdit={(
+                        d
+                      ) => {
+                        setSelectedDriver(
+                          d
+                        );
 
-                            setOpenEditDriverModal(
-                            true
-                            );
-                        }}
-                        onView={(d) => {
-                            setSelectedDriver(
-                            d
-                            );
+                        setOpenEditDriverModal(
+                          true
+                        );
+                      }}
+                      onView={(
+                        d
+                      ) => {
+                        setSelectedDriver(
+                          d
+                        );
 
-                            setOpenDriverDetailModal(
-                            true
-                            );
-                        }}
-                        onInactive={
-                            handleInactiveDriver
-                        }
+                        setOpenDriverDetailModal(
+                          true
+                        );
+                      }}
+                      onInactive={
+                        handleInactiveDriver
+                      }
                     />
                   )
                 )}
@@ -947,7 +527,6 @@ const handleUpdateApplicationStatus =
           "assignment" && (
           <>
             <div className="flex items-center gap-10">
-
               <SubTabButton
                 active={
                   assignmentTab ===
@@ -993,18 +572,21 @@ const handleUpdateApplicationStatus =
               assignmentTab ===
                 "vehicle" && (
                 <div className="space-y-5">
-
                   {assignments.map(
                     (
                       item
                     ) => (
                       <AssignmentCard
-                        key={item.id}
-                        item={item}
-                        onDeactivate={
-                            handleDeactivateAssignment
+                        key={
+                          item.id
                         }
-                    />
+                        item={
+                          item
+                        }
+                        onDeactivate={
+                          handleDeactivateAssignment
+                        }
+                      />
                     )
                   )}
 
@@ -1018,690 +600,28 @@ const handleUpdateApplicationStatus =
             {!loading &&
               assignmentTab ===
                 "work" && (
-                <div className="space-y-5">
+                <>
+
+                  {workLogs.length >
+                    0 && (
+
+                    <WorkLogList
+                      workLogs={
+                        workLogs
+                      }
+                    />
+                  )}
 
                   {workLogs.length ===
                     0 && (
+
                     <EmptyState text="Không có dữ liệu giờ làm việc" />
                   )}
-                </div>
-              )}
+                </>
+            )}
           </>
         )}
       </div>
     </>
   );
 }
-/* =========================
-   COMPONENTS
-========================= */
-
-function MainTabButton({
-  active,
-  title,
-  icon,
-  onClick,
-}: {
-  active: boolean;
-  title: string;
-  icon: React.ReactNode;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`pb-4 border-b-2 flex items-center gap-2 text-base font-semibold transition ${
-        active
-          ? "border-orange-500 text-orange-500"
-          : "border-transparent text-slate-400 hover:text-slate-600"
-      }`}
-    >
-      {icon}
-      {title}
-    </button>
-  );
-}
-
-function SubTabButton({
-  active,
-  title,
-  onClick,
-}: {
-  active: boolean;
-  title: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`pb-4 border-b-2 text-base font-semibold transition ${
-        active
-          ? "border-orange-500 text-orange-500"
-          : "border-transparent text-slate-400"
-      }`}
-    >
-      {title}
-    </button>
-  );
-}
-
-function TopBar({
-  total,
-  buttonText,
-  onClick,
-  hideButton = false,
-}: {
-  total: string;
-  buttonText: string;
-  onClick?: () => void;
-  hideButton?: boolean;
-}) {
-  return (
-    <div className="flex items-center justify-between">
-      <p className="text-base text-slate-400">
-        Tổng số:{" "}
-        <span className="font-bold text-slate-800">
-          {total}
-        </span>
-      </p>
-
-      {!hideButton && (
-        <button
-          onClick={onClick}
-          className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition"
-        >
-          <Plus size={22} />
-          {buttonText}
-        </button>
-      )}
-    </div>
-  );
-}
-
-/* =========================
-   CARD
-========================= */
-
-function RecruitmentCard({
-  item,
-  onClose,
-}: {
-  item: RecruitmentCampaign;
-  onClose: (
-    id: number
-  ) => void;
-}) {
-  return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-7">
-      <div className="flex justify-between">
-
-        <div>
-          <div className="flex items-center gap-4 mb-4">
-
-            <h2 className="text-xl font-bold text-slate-900">
-              {item.title}
-            </h2>
-
-            <StatusBadge
-              status={item.status}
-            />
-          </div>
-
-          <p className="text-base text-slate-500">
-            {item.description}
-          </p>
-        </div>
-
-        <Menu
-            button={
-                <button className="text-slate-400 hover:text-slate-700 transition">
-                <MoreVertical size={24} />
-                </button>
-            }
-            >
-            <MenuItem
-                onClick={() =>
-                onClose(item.id)
-                }
-            >
-                Đóng tuyển
-            </MenuItem>
-            </Menu>
-      </div>
-
-      <div className="border-t border-slate-200 mt-5 pt-5 grid grid-cols-2 gap-5">
-
-        <Info
-          icon={
-            <Calendar
-              size={18}
-            />
-          }
-          text={`Bắt đầu: ${formatDate(
-            item.startDate
-          )}`}
-        />
-
-        <Info
-          icon={
-            <Calendar
-              size={18}
-            />
-          }
-          text={`Kết thúc: ${formatDate(
-            item.endDate
-          )}`}
-        />
-      </div>
-    </div>
-  );
-}
-
-function DriverCard({
-  item,
-  onEdit,
-  onView,
-  onInactive,
-}: {
-  item: Driver;
-  onEdit: (
-    driver: Driver
-  ) => void;
-  onView: (
-    driver: Driver
-  ) => void;
-  onInactive: (
-    id: number
-  ) => void;
-}){
-  return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-7">
-
-      <div className="flex justify-between">
-
-        <div className="w-full">
-          <div className="flex items-center gap-4 mb-6">
-
-            <h2 className="text-xl font-bold text-slate-900">
-              {item.fullName}
-            </h2>
-
-            <StatusBadge
-              status={item.status}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-6 text-slate-500">
-
-            <Info
-              icon={
-                <Phone
-                  size={18}
-                />
-              }
-              text={item.phone}
-            />
-
-            <Info
-              icon={
-                <Mail
-                  size={18}
-                />
-              }
-              text={item.email}
-            />
-
-            <Info
-              icon={
-                <CreditCard
-                  size={18}
-                />
-              }
-              text={`GPLX: ${item.licenseNumber}`}
-            />
-
-            <Info
-              icon={
-                <Calendar
-                  size={18}
-                />
-              }
-              text={`Hết hạn: ${formatDate(
-                item.licenseExpiry
-              )}`}
-            />
-          </div>
-        </div>
-
-        <Menu
-            button={
-                <button className="text-slate-400 hover:text-slate-700 transition">
-                <MoreVertical size={24} />
-                </button>
-            }
-            >
-
-            <MenuItem
-                onClick={() =>
-                onEdit(item)
-                }
-            >
-                Chỉnh sửa
-            </MenuItem>
-
-            <MenuItem
-                onClick={() =>
-                onView(item)
-                }
-            >
-                Xem chi tiết
-            </MenuItem>
-
-            <MenuItem
-                onClick={() =>
-                onInactive(
-                    item.id
-                )
-                }
-            >
-                Ngừng hoạt động
-            </MenuItem>
-        </Menu>
-      </div>
-    </div>
-  );
-}
-
-function ApplicationCard({
-  item,
-  onUpdateStatus,
-}: {
-  item: JobApplication;
-  onUpdateStatus: (
-    id: number,
-    status: string
-  ) => void;
-}) {
-  return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-7">
-
-      <div className="flex justify-between">
-
-        <div className="w-full">
-          <div className="flex items-center gap-4 mb-4">
-
-            <h2 className="text-xl font-bold text-slate-900">
-              {item.fullName}
-            </h2>
-
-            <StatusBadge
-              status={item.status}
-            />
-          </div>
-
-          <p className="text-base text-slate-500 mb-5">
-            Ứng tuyển:
-            {" "}
-            {item.campaignName}
-          </p>
-
-          <div className="grid grid-cols-2 gap-5 text-slate-500">
-
-            <Info
-              icon={
-                <Phone
-                  size={18}
-                />
-              }
-              text={item.phone}
-            />
-
-            <Info
-              icon={
-                <Mail
-                  size={18}
-                />
-              }
-              text={item.email}
-            />
-
-            <Info
-              icon={
-                <MapPin
-                  size={18}
-                />
-              }
-              text={
-                item.address
-              }
-            />
-
-            <Info
-              icon={
-                <Users
-                  size={18}
-                />
-              }
-              text={`${item.experienceYears} năm kinh nghiệm`}
-            />
-          </div>
-        </div>
-
-        <Menu
-            button={
-                <button className="text-slate-400 hover:text-slate-700 transition">
-                <MoreVertical size={24} />
-                </button>
-            }
-            >
-
-            <MenuItem
-                onClick={() =>
-                onUpdateStatus(
-                    item.id,
-                    "REVIEWING"
-                )
-                }
-            >
-                Đang xem xét
-            </MenuItem>
-
-            <MenuItem
-                onClick={() =>
-                onUpdateStatus(
-                    item.id,
-                    "INTERVIEW"
-                )
-                }
-            >
-                Hẹn phỏng vấn
-            </MenuItem>
-
-            <MenuItem
-                onClick={() =>
-                onUpdateStatus(
-                    item.id,
-                    "APPROVED"
-                )
-                }
-            >
-                Duyệt hồ sơ
-            </MenuItem>
-
-            <MenuItem
-                onClick={() =>
-                onUpdateStatus(
-                    item.id,
-                    "REJECTED"
-                )
-                }
-            >
-                Từ chối
-            </MenuItem>
-        </Menu>
-      </div>
-    </div>
-  );
-}
-
-function AssignmentCard({
-  item,
-  onDeactivate,
-}: {
-  item: Assignment;
-  onDeactivate: (
-    id: number
-  ) => void;
-}){
-  return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-7">
-
-      <div className="flex justify-between items-center">
-
-        <div>
-          <h2 className="text-xl font-bold text-slate-900">
-            {item.driverName}
-          </h2>
-
-          <p className="text-base text-slate-500 mt-1">
-            Phương tiện:
-            {" "}
-            {item.plateNumber}
-          </p>
-        </div>
-
-        <div className="text-right">
-          <p className="text-sm text-slate-400">
-            Ngày bắt đầu
-          </p>
-
-          <p className="font-bold text-slate-900">
-            {formatDate(
-              item.assignedDate
-            )}
-          </p>
-        </div>
-
-        <Menu
-            button={
-                <button className="text-slate-400 hover:text-slate-700 transition">
-                <MoreVertical size={24} />
-                </button>
-            }
-        >
-        <MenuItem
-            onClick={() =>
-            onDeactivate(
-                item.id
-            )
-            }
-        >
-            Kết thúc phân công
-        </MenuItem>
-        </Menu>
-      </div>
-    </div>
-  );
-}
-
-/* =========================
-   COMMON
-========================= */
-
-function StatusBadge({
-  status,
-}: {
-  status: string;
-}) {
-  const isGreen =
-    status?.includes(
-      "ACTIVE"
-    ) ||
-    status?.includes(
-      "Đang"
-    );
-
-  return (
-    <span
-      className={`px-3 py-1 rounded-full text-sm font-semibold ${
-        isGreen
-          ? "bg-green-100 text-green-700"
-          : "bg-yellow-100 text-yellow-700"
-      }`}
-    >
-      {status}
-    </span>
-  );
-}
-
-function Info({
-  icon,
-  text,
-}: {
-  icon: React.ReactNode;
-  text?: string;
-}) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="text-slate-400">
-        {icon}
-      </span>
-
-      <span className="text-sm text-slate-700">
-        {text || "-"}
-      </span>
-    </div>
-  );
-}
-
-function EmptyState({
-  text,
-}: {
-  text: string;
-}) {
-  return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center text-slate-500">
-      {text}
-    </div>
-  );
-}
-
-function StatsGrid({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-      {children}
-    </div>
-  );
-}
-
-function StatCard({
-  title,
-  value,
-  icon,
-  color,
-}: {
-  title: string;
-  value: string | number;
-  icon: React.ReactNode;
-  color: string;
-}) {
-  return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-5">
-        <div
-          className={`w-14 h-14 rounded-2xl flex items-center justify-center ${color}`}
-        >
-          {icon}
-        </div>
-      </div>
-
-      <h2 className="text-3xl font-bold text-slate-900">
-        {value}
-      </h2>
-
-      <p className="text-sm text-slate-500 mt-1">
-        {title}
-      </p>
-    </div>
-  );
-}
-
-/* =========================
-   HELPER
-========================= */
-
-function formatDate(
-  date?: string
-) {
-  if (!date)
-    return "-";
-
-  return new Date(
-    date
-  ).toLocaleDateString(
-    "vi-VN"
-  );
-}
-function Menu({
-    button,
-    children,
-    }: {
-    button: React.ReactNode;
-    children: React.ReactNode;
-    }) {
-    const [open, setOpen] =
-        useState(false);
-
-    return (
-        <div className="relative">
-
-        <div
-            onClick={() =>
-            setOpen(!open)
-            }
-            className="cursor-pointer"
-        >
-            {button}
-        </div>
-
-        {open && (
-            <>
-            {/* overlay để click ngoài đóng menu */}
-            <div
-                className="fixed inset-0 z-40"
-                onClick={() =>
-                setOpen(false)
-                }
-            />
-
-            <div className="absolute right-0 top-10 bg-white rounded-2xl shadow-xl border border-slate-200 min-w-[220px] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-                {React.Children.map(
-                children,
-                (child) =>
-                    React.isValidElement(
-                    child
-                    )
-                    ? React.cloneElement(
-                        child as React.ReactElement<any>,
-                        {
-                            onClose:
-                            () =>
-                                setOpen(
-                                false
-                                ),
-                        }
-                        )
-                    : child
-                )}
-            </div>
-            </>
-        )}
-        </div>
-    );
-    }
-
-function MenuItem({
-    children,
-    onClick,
-    onClose,
-    }: {
-    children: React.ReactNode;
-    onClick: () => void;
-    onClose?: () => void;
-    }) {
-    return (
-        <button
-        onClick={() => {
-            onClick();
-            onClose?.();
-        }}
-        className="w-full px-4 py-3 text-left hover:bg-slate-100 transition text-sm"
-        >
-        {children}
-        </button>
-    );
-    }
