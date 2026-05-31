@@ -10,7 +10,7 @@ export default function ProtectedRoute({
   const token = localStorage.getItem("token");
 
   if (!token) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/careers" replace />;
   }
 
   if (roles && roles.length > 0) {

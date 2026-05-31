@@ -48,5 +48,5 @@ export interface JobApplicationRequest {
   licenseClass: string;
   licenseImage: string;
   licenseIssueDate: string;
-  status: string;
+  status?: string;
 }
