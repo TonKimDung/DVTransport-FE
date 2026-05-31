@@ -1,49 +1,27 @@
-// src/components/sem/useSemAnalytics.ts
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
-import { useEffect, useMemo, useState } from "react";
-import { semService } from "../services/semService";
+import { semService }
+from "../services/semService";
 
 interface Estimate {
   lval: string;
   rval: string;
   Estimate: number;
   op: string;
+
   "Std. Err"?: number;
   "z-value"?: number;
   "p-value"?: number;
 }
 
-interface Insight {
-  from: string;
-  to: string;
-  effect: number;
-  direction: string;
-}
-
-interface ChartNode {
-  id: string;
-}
-
-interface ChartEdge {
-  source: string;
-  target: string;
-  weight: number;
-}
-
-interface SemResponse {
-  rows: number;
-  estimates: Estimate[];
-  insights: Insight[];
-  businessInsights: BusinessInsight[];
-  chart?: {
-    nodes: ChartNode[];
-    edges: ChartEdge[];
-  };
-}
-
-interface BusinessInsight {
+interface SummaryInsight {
   title: string;
   description: string;
+
   type:
     | "cost"
     | "revenue"
@@ -54,7 +32,35 @@ interface BusinessInsight {
   impact: number;
 }
 
+interface ChartNode {
+  name: string;
+}
 
+interface ChartEdge {
+  source: string;
+  target: string;
+
+  weight: number;
+
+  p_value?: number;
+
+  visual_width?: number;
+
+  weight_normalized?: number;
+}
+
+interface SemResponse {
+  rows: number;
+
+  estimates: Estimate[];
+
+  insights: SummaryInsight[];
+
+  chart?: {
+    nodes: ChartNode[];
+    edges: ChartEdge[];
+  };
+}
 export function useSemAnalytics() {
   const [loading, setLoading] =
     useState(true);
@@ -68,106 +74,172 @@ export function useSemAnalytics() {
     string,
     string
   > = {
-    total_capacity:
-      "Tổng công suất vận chuyển",
-
-    empty_miles:
-      "Quãng đường chạy rỗng",
-
+    // Fleet
     new_vehicle_ratio:
       "Tỷ lệ xe mới",
+
+    fuel_efficiency:
+      "Hiệu suất nhiên liệu",
+
+    maintenance_cost:
+      "Chi phí bảo trì",
+
+    // Operation
+    ontime_rate:
+      "Tỷ lệ đúng giờ",
+
+    completed_trip_rate:
+      "Tỷ lệ hoàn thành chuyến",
+
+    empty_miles:
+      "Quãng đường rỗng",
 
     incident_rate:
       "Tỷ lệ sự cố",
 
+    // Driver
+    driver_performance:
+      "Hiệu suất tài xế",
+
+    // Customer
     retention_rate:
       "Tỷ lệ giữ chân khách hàng",
 
+    new_contracts:
+      "Hợp đồng mới",
+
+    // Finance
     avg_revenue:
       "Doanh thu trung bình",
 
-    new_contracts:
-      "Số hợp đồng mới",
+    net_profit:
+      "Lợi nhuận ròng",
+
+    revenue_growth:
+      "Tăng trưởng doanh thu",
   };
 
   const getLabel = (
     value: string
   ) =>
-    labelMap[value] || value;
+    labelMap[value] ||
+    value;
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
+  const fetchData =
+    async () => {
+      try {
+        setLoading(
+          true
+        );
 
-      const res =
-        await semService.analyze();
+        const res =
+          await semService.analyze();
 
-      setData(res);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+        setData(res);
+      } catch (err) {
+        console.error(
+          err
+        );
+      } finally {
+        setLoading(
+          false
+        );
+      }
+    };
 
-  const paths = useMemo(() => {
-    if (!data?.estimates)
-      return [];
+  const paths =
+    useMemo(() => {
+      if (
+        !data?.estimates
+      ) {
+        return [];
+      }
 
-    return data.estimates
-      .filter((e) => e.op === "~")
-      .map((e) => ({
-        source: e.rval,
-        target: e.lval,
+      return (
+        data.estimates
+          .filter(
+            (e) =>
+              e.op === "~"
+          )
+          .map(
+            (e) => ({
+              source:
+                e.rval,
 
-        sourceLabel:
-          getLabel(e.rval),
+              target:
+                e.lval,
 
-        targetLabel:
-          getLabel(e.lval),
+              sourceLabel:
+                getLabel(
+                  e.rval
+                ),
 
-        effect: Number(
-          Number(
-            e.Estimate
-          ).toFixed(3)
-        ),
+              targetLabel:
+                getLabel(
+                  e.lval
+                ),
 
-        pValue:
-          e["p-value"] || 0,
+              effect:
+                Number(
+                  Number(
+                    e.Estimate
+                  ).toFixed(
+                    3
+                  )
+                ),
 
-        zValue:
-          e["z-value"] || 0,
-      }));
-  }, [data]);
+              pValue:
+                Number(
+                  e[
+                    "p-value"
+                  ] ?? 1
+                ),
+
+              zValue:
+                Number(
+                  e[
+                    "z-value"
+                  ] ?? 0
+                ),
+            })
+          )
+      );
+    }, [data]);
 
   const positiveCount =
     paths.filter(
-      (p) => p.effect > 0
+      (p) =>
+        p.effect > 0
     ).length;
 
   const negativeCount =
     paths.filter(
-      (p) => p.effect < 0
+      (p) =>
+        p.effect < 0
     ).length;
 
   const significantRelations =
     paths.filter(
-      (p) => p.pValue < 0.05
+      (p) =>
+        p.pValue < 0.05
     ).length;
 
-  const strongestDrivers = [
-    ...paths,
-  ]
-    .sort(
-      (a, b) =>
-        Math.abs(b.effect) -
-        Math.abs(a.effect)
-    )
-    .slice(0, 6);
+  const strongestDrivers =
+    [...paths]
+      .sort(
+        (a, b) =>
+          Math.abs(
+            b.effect
+          ) -
+          Math.abs(
+            a.effect
+          )
+      )
+      .slice(0, 6);
 
   return {
     loading,

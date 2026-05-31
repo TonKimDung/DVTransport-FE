@@ -20,28 +20,45 @@ const labelMap: Record<
   string,
   string
 > = {
-  total_capacity:
-    "Tổng công suất vận chuyển",
-
-  empty_miles:
-    "Quãng đường chạy rỗng",
-
   new_vehicle_ratio:
     "Tỷ lệ xe mới",
+
+  fuel_efficiency:
+    "Hiệu suất nhiên liệu",
+
+  maintenance_cost:
+    "Chi phí bảo trì",
+
+  ontime_rate:
+    "Tỷ lệ đúng giờ",
+
+  completed_trip_rate:
+    "Tỷ lệ hoàn thành chuyến",
+
+  empty_miles:
+    "Quãng đường rỗng",
 
   incident_rate:
     "Tỷ lệ sự cố",
 
+  driver_performance:
+    "Hiệu suất tài xế",
+
   retention_rate:
     "Tỷ lệ giữ chân khách hàng",
+
+  new_contracts:
+    "Hợp đồng mới",
 
   avg_revenue:
     "Doanh thu trung bình",
 
-  new_contracts:
-    "Số hợp đồng mới",
-};
+  net_profit:
+    "Lợi nhuận ròng",
 
+  revenue_growth:
+    "Tăng trưởng doanh thu",
+};
 const getLabel = (
   v: string
 ) => labelMap[v] || v;
@@ -226,130 +243,216 @@ export default function SemReport() {
         },
 
         data: [
-          {
-            name:
-              "total_capacity",
-            x: 120,
-            y: 120,
-            itemStyle: {
-              color: "#6366f1",
-            },
+        {
+          name:
+            "new_vehicle_ratio",
+          x: 100,
+          y: 160,
+          itemStyle: {
+            color:
+              "#6366f1",
           },
+        },
 
-          {
-            name:
-              "new_vehicle_ratio",
-            x: 120,
-            y: 280,
-            itemStyle: {
-              color: "#8b5cf6",
-            },
+        {
+          name:
+            "fuel_efficiency",
+          x: 350,
+          y: 80,
+          itemStyle: {
+            color:
+              "#06b6d4",
           },
+        },
 
-          {
-            name:
-              "incident_rate",
-            x: 120,
-            y: 450,
-            itemStyle: {
-              color: "#f59e0b",
-            },
+        {
+          name:
+            "maintenance_cost",
+          x: 350,
+          y: 260,
+          itemStyle: {
+            color:
+              "#ef4444",
           },
+        },
 
-          {
-            name:
-              "empty_miles",
-            x: 450,
-            y: 250,
-            itemStyle: {
-              color: "#ef4444",
-            },
+        {
+          name:
+            "ontime_rate",
+          x: 600,
+          y: 160,
+          itemStyle: {
+            color:
+              "#8b5cf6",
           },
+        },
 
-          {
-            name:
-              "retention_rate",
-            x: 780,
-            y: 250,
-            itemStyle: {
-              color: "#14b8a6",
-            },
+        {
+          name:
+            "completed_trip_rate",
+          x: 850,
+          y: 80,
+          itemStyle: {
+            color:
+              "#14b8a6",
           },
+        },
 
-          {
-            name:
-              "new_contracts",
-            x: 780,
-            y: 450,
-            itemStyle: {
-              color: "#22c55e",
-            },
+        {
+          name:
+            "empty_miles",
+          x: 850,
+          y: 260,
+          itemStyle: {
+            color:
+              "#f97316",
           },
+        },
 
-          {
-            name:
-              "avg_revenue",
-            x: 1100,
-            y: 300,
-            itemStyle: {
-              color: "#0ea5e9",
-            },
+        {
+          name:
+            "incident_rate",
+          x: 600,
+          y: 360,
+          itemStyle: {
+            color:
+              "#dc2626",
           },
-        ],
+        },
 
-        links:
-          data?.chart?.edges.map(
-            (e) => ({
-              source:
-                e.source,
+        {
+          name:
+            "driver_performance",
+          x: 850,
+          y: 380,
+          itemStyle: {
+            color:
+              "#22c55e",
+          },
+        },
 
-              target:
-                e.target,
+        {
+          name:
+            "retention_rate",
+          x: 1100,
+          y: 180,
+          itemStyle: {
+            color:
+              "#10b981",
+          },
+        },
 
-              value:
-                e.weight,
+        {
+          name:
+            "new_contracts",
+          x: 1100,
+          y: 380,
+          itemStyle: {
+            color:
+              "#84cc16",
+          },
+        },
 
-              lineStyle: {
-                width:
-                  Math.abs(
-                    e.weight
-                  ) *
-                    2 +
-                  3,
+        {
+          name:
+            "avg_revenue",
+          x: 1400,
+          y: 180,
+          itemStyle: {
+            color:
+              "#0ea5e9",
+          },
+        },
 
-                color:
-                  e.weight > 0
-                    ? "#22c55e"
-                    : "#ef4444",
+        {
+          name:
+            "net_profit",
+          x: 1650,
+          y: 180,
+          itemStyle: {
+            color:
+              "#f59e0b",
+          },
+        },
 
-                curveness: 0.15,
-                opacity: 0.9,
-              },
+        {
+          name:
+            "revenue_growth",
+          x: 1650,
+          y: 380,
+          itemStyle: {
+            color:
+              "#ec4899",
+          },
+        },
+      ],
 
-              label: {
-                show: true,
+      links:
+        data?.chart?.edges?.map(
+          (e) => ({
+            source:
+              e.source,
 
-                formatter:
-                  e.weight.toFixed(
-                    2
-                  ),
+            target:
+              e.target,
 
-                fontSize: 12,
+            value:
+              e.weight,
 
-                backgroundColor:
-                  "#fff",
+            lineStyle: {
+              width:
+                e.visual_width ??
+                Math.abs(
+                  e.weight
+                ) *
+                  3 +
+                  2,
 
-                padding: [4, 8],
+              color:
+                e.weight > 0
+                  ? "#22c55e"
+                  : "#ef4444",
 
-                borderRadius: 8,
+              curveness:
+                0.2,
 
-                color:
-                  e.weight > 0
-                    ? "#166534"
-                    : "#991b1b",
-              },
-            })
-          ) || [],
+              opacity:
+                0.9,
+            },
+
+            label: {
+              show:
+                true,
+
+              formatter:
+                Number(
+                  e.weight
+                ).toFixed(
+                  2
+                ),
+
+              fontSize:
+                12,
+
+              backgroundColor:
+                "#fff",
+
+              padding: [
+                4,
+                8,
+              ],
+
+              borderRadius:
+                8,
+
+              color:
+                e.weight >
+                0
+                  ? "#166534"
+                  : "#991b1b",
+            },
+          })
+        ) || [],
 
         edgeSymbol: [
           "circle",
@@ -591,7 +694,7 @@ export default function SemReport() {
                   </td>
 
                   <td>
-                    {p.pValue.toFixed(
+                    {(p.pValue|| 0) .toFixed(
                       5
                     )}
                   </td>
@@ -677,9 +780,10 @@ export default function SemReport() {
             };
 
             const style =
-            styles[
+              styles[
                 item.type as keyof typeof styles
-            ];
+              ] ??
+              styles.general;
 
             return (
             <div

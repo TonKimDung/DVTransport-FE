@@ -20,6 +20,7 @@ import LegalDocumentPage from "./pages/LegalDocumentPage";
 import SystemManagementPage from "./pages/SystemManagementPage";
 import LoginPage from "./pages/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import CareersPage from "./pages/CareersPage";
 
 function App() {
   return (
@@ -27,9 +28,14 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={<Navigate to="/admin/dashboard" replace />}
+          element={
+            localStorage.getItem("token")
+              ? <Navigate to="/admin/dashboard" replace />
+              : <Navigate to="/careers" replace />
+          }
         />
 
+        <Route path="/careers" element={<CareersPage />}/>
         <Route path="/login" element={<LoginPage />} />
 
         <Route
